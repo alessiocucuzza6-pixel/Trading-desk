@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Trading Desk"/>
+  <meta name="theme-color" content="#0a0a0a"/>
+  <title>Trading Desk</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#0a0a0a;color:#e8e8e8;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5;min-height:100vh;}
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:#0a0a0a;}
+    ::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+    input,select,textarea{font-family:'JetBrains Mono',monospace;font-size:13px;}
+    .wrap{max-width:1200px;margin:0 auto;padding:env(safe-area-inset-top, 24px) 16px 24px;}
+    .hdr{display:flex;align-items:baseline;gap:16px;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid #222;}
+    .htitle{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#c8a84b;letter-spacing:-0.5px;}
+    .hsub{font-size:11px;color:#555;letter-spacing:.05em;}
+    .tabs{display:flex;gap:2px;margin-bottom:22px;background:#111;border:1px solid #222;border-radius:8px;padding:4px;}
+    .tab{flex:1;padding:10px 8px;border:none;background:transparent;color:#999;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:5px;transition:all .18s;}
+    .tab.on{background:#c8a84b;color:#0a0a0a;}
+    .tab-badge{display:inline-block;background:#e05c5c;color:#fff;border-radius:10px;font-size:9px;padding:1px 6px;margin-left:5px;font-weight:800;vertical-align:middle;}
+    .card{background:#111;border:1px solid #222;border-radius:8px;padding:20px;margin-bottom:16px;}
+    .ctitle{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+    .ctitle::before{content:'';display:block;width:3px;height:12px;background:#c8a84b;border-radius:2px;}
+    .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:14px;}
+    .field{display:flex;flex-direction:column;gap:5px;}
+    .field label{font-size:10px;color:#999;letter-spacing:.08em;text-transform:uppercase;}
+    .field input,.field select,.field textarea{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:5px;padding:9px 11px;color:#e8e8e8;outline:none;transition:border-color .15s;width:100%;}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:#c8a84b;}
+    .field select option{background:#1a1a1a;}
+    .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+    .mode{padding:12px 8px;border:1px solid #2e2e2e;background:#1a1a1a;color:#999;border-radius:6px;cursor:pointer;text-align:center;transition:all .18s;}
+    .mode.on{border-color:#c8a84b;background:rgba(200,168,75,0.12);color:#c8a84b;}
+    .mlabel{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;display:block;}
+    .mmeta{font-size:10px;opacity:.7;display:block;margin-top:2px;}
+    .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-top:16px;}
+    .rbox{background:#1a1a1a;border:1px solid #222;border-radius:6px;padding:14px;}
+    .rlabel{font-size:10px;color:#999;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+    .rval{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+    .runit{font-size:11px;color:#999;margin-left:3px;}
+    .rbox.hi{border-color:#c8a84b;background:rgba(200,168,75,0.12);}.rbox.hi .rval{color:#c8a84b;}
+    .rbox.gd .rval{color:#4caf7d;}.rbox.bd .rval{color:#e05c5c;}
+    .alert{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:5px;margin-top:8px;font-size:12px;}
+    .alert.ok{background:rgba(76,175,125,0.15);color:#4caf7d;}
+    .alert.warn{background:rgba(224,92,92,0.15);color:#e05c5c;}
+    .alert.info{background:rgba(91,155,213,0.15);color:#5b9bd5;}
+    .btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;transition:all .18s;}
+    .btn:disabled{opacity:.35;cursor:not-allowed;}
+    .btn-p{background:#c8a84b;color:#0a0a0a;}.btn-p:active{background:#e0bc56;}
+    .btn-g{background:transparent;border:1px solid #2e2e2e;color:#999;}
+    .brow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px;}
+    .srow{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:20px;}
+    .sbox{background:#111;border:1px solid #222;border-radius:6px;padding:14px;}
+    .slabel{font-size:10px;color:#555;letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px;}
+    .sval{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#e8e8e8;}
+    .mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .jtable{width:100%;border-collapse:collapse;font-size:12px;}
+    .jtable th{text-align:left;padding:8px 10px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#555;border-bottom:1px solid #222;font-family:'Syne',sans-serif;font-weight:700;white-space:nowrap;}
+    .jtable td{padding:9px 10px;border-bottom:1px solid #222;vertical-align:middle;white-space:nowrap;}
+    .jtable tr:last-child td{border-bottom:none;}
+    .jtable tr.open-row td{background:rgba(200,168,75,0.04);}
+    .tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.06em;}
+    .t-scalp{background:rgba(91,155,213,.2);color:#5b9bd5;}
+    .t-intraday{background:rgba(200,168,75,.2);color:#c8a84b;}
+    .t-swing{background:rgba(76,175,125,.2);color:#4caf7d;}
+    .t-win{background:rgba(76,175,125,0.15);color:#4caf7d;}
+    .t-loss{background:rgba(224,92,92,0.15);color:#e05c5c;}
+    .t-open{background:rgba(200,168,75,.15);color:#c8a84b;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+    .del-btn{background:none;border:none;color:#555;cursor:pointer;font-size:14px;padding:4px 8px;border-radius:3px;transition:color .15s;line-height:1;}
+    .cl-score{display:inline-flex;align-items:center;padding:2px 9px;border-radius:3px;font-size:10px;font-family:'Syne',sans-serif;font-weight:700;}
+    .cl-score.full{background:rgba(76,175,125,0.15);color:#4caf7d;}
+    .cl-score.part{background:rgba(224,125,58,0.15);color:#e07d3a;}
+    .cl-score.none{background:rgba(150,150,150,.1);color:#555;}
+    .cl-wrap{margin-top:4px;}
+    .cl-sec{margin-bottom:8px;}
+    .cl-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#1a1a1a;border:1px solid #222;border-radius:6px 6px 0 0;cursor:pointer;user-select:none;}
+    .cl-hdr.done{border-color:#4caf7d;}
+    .cl-hdr-l{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .cl-stitle{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;}
+    .cl-tf{font-size:9px;color:#555;background:#0a0a0a;border:1px solid #222;padding:2px 7px;border-radius:3px;}
+    .cl-items{border:1px solid #222;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;}
+    .ci{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid #222;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+    .ci:last-child{border-bottom:none;}.ci.ck{background:rgba(76,175,125,.04);}
+    .cbox{width:18px;height:18px;min-width:18px;border:1.5px solid #2e2e2e;border-radius:3px;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:10px;}
+    .ci.ck .cbox{background:#4caf7d;border-color:#4caf7d;color:white;}
+    .citext{font-size:12px;line-height:1.5;color:#e8e8e8;flex:1;}
+    .ci.ck .citext{color:#999;text-decoration:line-through;}
+    .cl-bar-wrap{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:6px;margin-bottom:10px;font-size:12px;}
+    .cl-bar-wrap.all{background:rgba(76,175,125,0.15);border:1px solid #4caf7d;color:#4caf7d;}
+    .cl-bar-wrap.part{background:rgba(224,125,58,0.15);border:1px solid #e07d3a;color:#e07d3a;}
+    .cl-bar-wrap.none{background:rgba(150,150,150,.07);border:1px solid #222;color:#999;}
+    .cl-track{height:4px;background:#222;border-radius:2px;flex:1;margin:0 12px;}
+    .cl-fill{height:100%;border-radius:2px;transition:width .3s;}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    .modal{background:#111;border:1px solid #2e2e2e;border-radius:12px;width:100%;max-width:700px;margin:auto;padding:24px;animation:su .2s ease;}
+    @keyframes su{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .modal-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:4px;}
+    .modal-sub{font-size:11px;color:#999;margin-bottom:20px;line-height:1.6;}
+    .m-sec{margin-bottom:20px;}
+    .m-stitle{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #222;}
+    .pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+    .pf-item{background:#1a1a1a;border:1px solid #222;border-radius:5px;padding:10px;}
+    .pf-label{font-size:9px;color:#555;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px;}
+    .pf-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+    .open-notice{display:flex;align-items:center;gap:8px;background:rgba(200,168,75,.08);border:1px solid #8a7030;color:#c8a84b;border-radius:6px;padding:10px 14px;font-size:12px;margin-bottom:12px;}
+    .close-box{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:8px;padding:16px;}
+    .close-box-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:#999;margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase;}
+    .out-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+    .out-btn{padding:12px 8px;border:1px solid #2e2e2e;background:#0a0a0a;color:#999;border-radius:5px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-align:center;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+    .out-btn.win.on{border-color:#4caf7d;background:rgba(76,175,125,0.15);color:#4caf7d;}
+    .out-btn.loss.on{border-color:#e05c5c;background:rgba(224,92,92,0.15);color:#e05c5c;}
+    .out-btn.open.on{border-color:#c8a84b;background:rgba(200,168,75,0.12);color:#c8a84b;}
+    .hint{font-size:11px;color:#555;border-left:2px solid #8a7030;padding:8px 12px;border-radius:0 4px 4px 0;margin-top:14px;line-height:1.6;}
+    .cl-standalone-sum{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-radius:8px;margin-top:14px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;}
+    .cl-standalone-sum.ok{background:rgba(76,175,125,0.15);border:1px solid #4caf7d;color:#4caf7d;}
+    .cl-standalone-sum.no{background:rgba(224,92,92,0.15);border:1px solid #e05c5c;color:#e05c5c;}
+    .empty{text-align:center;padding:48px 24px;color:#555;font-size:12px;}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+    @media(max-width:600px){
+      .modes{grid-template-columns:1fr 1fr;}
+      .pf-grid{grid-template-columns:1fr 1fr;}
+      .rgrid{grid-template-columns:1fr 1fr;}
+      .fgrid{grid-template-columns:1fr 1fr;}
+      .wrap{padding:16px 12px 32px;}
+      .htitle{font-size:18px;}
+      .tab{font-size:10px;padding:9px 4px;letter-spacing:.04em;}
+      .modal{padding:18px;}
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const CHECKLISTS = {
+  scalp: { label:"Scalping", sections:[
+    { id:"sc1", title:"1 · FINESTRA TEMPORALE", tf:"Orologio", items:[
+      {id:"sc1a",text:"Sei nei primi 30-60 min di Londra (08:00-09:00) o New York (14:00-15:00)?"},
+      {id:"sc1b",text:"Eviti i 30 minuti prima/dopo un dato macro ad alto impatto?"},
+      {id:"sc1c",text:"Eviti la dead zone 12:00-13:30 e dopo le 17:00?"},
+    ]},
+    { id:"sc2", title:"2 · ALLINEAMENTO DIREZIONALE", tf:"H1 / M15", items:[
+      {id:"sc2a",text:"Sul H1: bias di sessione chiaro? (no scalp in laterale)"},
+      {id:"sc2b",text:"Sul M15: sweep recente che ha definito la direzione di breve?"},
+      {id:"sc2c",text:"Sul M15: CHoCH o BOS che conferma la micro-struttura attesa?"},
+      {id:"sc2d",text:"Non stai operando contro il trend H1 senza confluenza forte?"},
+    ]},
+    { id:"sc3", title:"3 · ORDER BLOCK DI SCALP", tf:"M5 / M1", items:[
+      {id:"sc3a",text:"L'OB è fresco? (formato nelle ultime 1-3 ore)"},
+      {id:"sc3b",text:"L'OB si trova in zona premium (sell) o discount (buy)?"},
+      {id:"sc3c",text:"C'è un FVG adiacente all'OB che aumenta la precisione?"},
+      {id:"sc3d",text:"L'OB NON è già stato toccato in questa sessione? (2+ tocchi = evita)"},
+    ]},
+    { id:"sc4", title:"4 · ENTRY E RISCHIO", tf:"M1", items:[
+      {id:"sc4a",text:"Il limit order è sul livello esatto dell'OB con spread incluso?"},
+      {id:"sc4b",text:"Lo SL è oltre il wick estremo dell'OB (non la candela intera)?"},
+      {id:"sc4c",text:"Il TP è sul livello di liquidità più vicino di sessione?"},
+      {id:"sc4d",text:"Il RR è almeno 1:2?"},
+      {id:"sc4e",text:"Il rischio è max 0.25-0.5% del capitale?"},
+    ]},
+    { id:"sc5", title:"5 · FILTRI ANTI-ERRORE", tf:"Pre-click", items:[
+      {id:"sc5a",text:"Lo spread attuale è nella norma per questo strumento?"},
+      {id:"sc5b",text:"Stai confermando il setup, non inseguendo un movimento già partito?"},
+      {id:"sc5c",text:"Hai un time stop: se non si muove in 5-10 min, chiudi e rivaluta?"},
+      {id:"sc5d",text:"Non hai già raggiunto 3 stop consecutivi in questa sessione?"},
+    ]},
+  ]},
+  intraday: { label:"Intraday", sections:[
+    { id:"in1", title:"1 · SESSIONE E CONTESTO", tf:"Pre-market", items:[
+      {id:"in1a",text:"Sei nella sessione giusta? (Londra 08:00-11:00 / New York 14:00-17:00)"},
+      {id:"in1b",text:"Nessun evento macro ad alto impatto nelle prossime 2 ore?"},
+      {id:"in1c",text:"Il bias Daily è chiaro? (no operatività in indecisione strutturale)"},
+    ]},
+    { id:"in2", title:"2 · BIAS DIREZIONALE", tf:"H4 / H1", items:[
+      {id:"in2a",text:"Sul H4: sweep di liquidità su massimi o minimi significativi?"},
+      {id:"in2b",text:"Sul H4/H1: CHoCH o BOS che conferma la direzione attesa?"},
+      {id:"in2c",text:"Il bias intraday è allineato con il bias Daily?"},
+      {id:"in2d",text:"Sono presenti FVG aperti nella direzione del bias?"},
+    ]},
+    { id:"in3", title:"3 · ORDER BLOCK", tf:"M15 / M5", items:[
+      {id:"in3a",text:"Hai identificato l'ultimo candelone opposto PRIMA dello sweep intraday?"},
+      {id:"in3b",text:"L'OB è stato toccato meno di 3 volte?"},
+      {id:"in3c",text:"L'OB si trova in zona premium (sell) o discount (buy)?"},
+      {id:"in3d",text:"C'è un FVG o zona di squilibrio a supporto dell'OB?"},
+    ]},
+    { id:"in4", title:"4 · ENTRY E RISCHIO", tf:"M5 / M1", items:[
+      {id:"in4a",text:"Il limit order è sul livello dell'OB con precisione?"},
+      {id:"in4b",text:"Lo SL è oltre il massimo/minimo dell'OB + buffer spread?"},
+      {id:"in4c",text:"Il TP è sul livello di liquidità opposto di sessione?"},
+      {id:"in4d",text:"Il RR è almeno 1:3?"},
+      {id:"in4e",text:"Il rischio è max 0.5-1% del capitale?"},
+    ]},
+    { id:"in5", title:"5 · FILTRI FINALI", tf:"Pre-esecuzione", items:[
+      {id:"in5a",text:"Il prezzo non è già dentro l'OB da troppo tempo (setup stantio)?"},
+      {id:"in5b",text:"Hai un time stop — se non si muove entro 30-60 min, esci?"},
+      {id:"in5c",text:"Il setup è stato identificato prima che il prezzo arrivi all'entry?"},
+    ]},
+  ]},
+  swing: { label:"Swing", sections:[
+    { id:"sw1", title:"1 · CONTESTO DI FINE ESTENSIONE", tf:"Monthly / Weekly", items:[
+      {id:"sw1a",text:"Il prezzo ha raggiunto una zona di fine estensione sul Monthly?"},
+      {id:"sw1b",text:"Sul Weekly: sweep sui massimi o minimi strutturali significativi?"},
+    ]},
+    { id:"sw2", title:"2 · CAMBIO DI STRUTTURA", tf:"Daily", items:[
+      {id:"sw2a",text:"Sul Daily: lower low (sell) o higher high (buy) — cambio di dominance?"},
+      {id:"sw2b",text:"Il bias generale è confermato SHORT o LONG sul Daily?"},
+      {id:"sw2c",text:"È presente un CHoCH sul Daily che conferma il cambio di struttura?"},
+      {id:"sw2d",text:"Il CHoCH è accompagnato da uno sbilanciamento che rafforza la pressione?"},
+      {id:"sw2e",text:"Non ci sono zone di liquidità tra entry e target che bloccano il movimento?"},
+    ]},
+    { id:"sw3", title:"3 · IDENTIFICAZIONE ORDER BLOCK", tf:"H8 / H4", items:[
+      {id:"sw3a",text:"Hai identificato l'ultimo candelone opposto PRIMA dello sweep?"},
+      {id:"sw3b",text:"L'Order Block è ancora intatto (non mitigato)?"},
+      {id:"sw3c",text:"Il livello dell'OB coincide con un'area strutturale (ex-supporto/resistenza)?"},
+    ]},
+    { id:"sw4", title:"4 · ENTRY E GESTIONE RISCHIO", tf:"H1 / H4", items:[
+      {id:"sw4a",text:"Il limit order è posizionato sul livello dell'Order Block?"},
+      {id:"sw4b",text:"Lo SL è OLTRE il massimo/minimo dello sweep (invalidazione pulita)?"},
+      {id:"sw4c",text:"Il TP è su un livello di supporto/resistenza significativo?"},
+      {id:"sw4d",text:"Il RR è almeno 1:4?"},
+      {id:"sw4e",text:"Il rischio rispetta la regola di gestione del capitale (max 1-2%)?"},
+    ]},
+    { id:"sw5", title:"5 · FILTRI FINALI", tf:"Pre-esecuzione", items:[
+      {id:"sw5a",text:"Non ci sono eventi macro imminenti (NFP, CPI, banche centrali)?"},
+      {id:"sw5b",text:"Hai calcolato il costo swap overnight — non erode il profitto atteso?"},
+      {id:"sw5c",text:"Il setup è stato identificato PRIMA che il prezzo arrivi all'entry?"},
+      {id:"sw5d",text:"Hai un piano chiaro: profit target e invalidazione?"},
+    ]},
+  ]},
+};
+
+const MODES = {
+  scalp:    {label:"Scalping",  tf:"M1/M5",    risk:0.25, rrMin:2},
+  intraday: {label:"Intraday",  tf:"M15/H1",   risk:0.5,  rrMin:3},
+  swing:    {label:"Swing",     tf:"H4/Daily",  risk:1.0,  rrMin:4},
+};
+
+function getAllIds(mode){ return (CHECKLISTS[mode]?.sections||[]).flatMap(s=>s.items.map(i=>i.id)); }
+function score(mode,checked){ const ids=getAllIds(mode),done=ids.filter(id=>checked[id]).length; return {done,total:ids.length,pct:ids.length?Math.round(done/ids.length*100):0}; }
+function loadTrades(){ try{ return JSON.parse(localStorage.getItem("td_trades")||"[]"); }catch{ return []; } }
+function saveTrades(t){ try{ localStorage.setItem("td_trades",JSON.stringify(t)); }catch{} }
+
+function ScoreBadge({mode,checked}){
+  const {done,total}=score(mode,checked||{});
+  if(!total) return <span className="cl-score none">—</span>;
+  const cls=done===total?"full":done>0?"part":"none";
+  return <span className={`cl-score ${cls}`}>{done}/{total}</span>;
+}
+
+function InlineChecklist({mode,checked,onChange}){
+  const cl=CHECKLISTS[mode];
+  const [openSec,setOpenSec]=useState({});
+  const {done,total,pct}=score(mode,checked);
+  if(!cl) return <div style={{color:"#555",fontSize:12,padding:"8px 0"}}>Checklist non disponibile.</div>;
+  const toggle=id=>onChange({...checked,[id]:!checked[id]});
+  const barColor=pct===100?"#4caf7d":pct>50?"#e07d3a":"#e05c5c";
+  return(
+    <div className="cl-wrap">
+      <div className={`cl-bar-wrap ${pct===100?"all":pct>0?"part":"none"}`}>
+        <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:12,whiteSpace:"nowrap"}}>
+          {pct===100?"✅ Completata":`${done}/${total} voci`}
+        </span>
+        <div className="cl-track"><div className="cl-fill" style={{width:`${pct}%`,background:barColor}}/></div>
+        <span style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:13,whiteSpace:"nowrap"}}>{pct}%</span>
+      </div>
+      {cl.sections.map(sec=>{
+        const sc=sec.items.filter(i=>checked[i.id]).length,sd=sc===sec.items.length;
+        const isOpen=openSec[sec.id]!==false;
+        return(
+          <div key={sec.id} className="cl-sec">
+            <div className={`cl-hdr ${sd?"done":""}`} onClick={()=>setOpenSec(p=>({...p,[sec.id]:!isOpen}))}>
+              <div className="cl-hdr-l">
+                <span style={{fontSize:11,color:sd?"#4caf7d":"#555"}}>{sd?"✅":"○"}</span>
+                <span className="cl-stitle">{sec.title}</span>
+                <span className="cl-tf">{sec.tf}</span>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:11,fontFamily:"'Syne',sans-serif",fontWeight:700,color:sd?"#4caf7d":"#999"}}>{sc}/{sec.items.length}</span>
+                <span style={{fontSize:10,color:"#555"}}>{isOpen?"▲":"▼"}</span>
+              </div>
+            </div>
+            {isOpen&&(
+              <div className="cl-items">
+                {sec.items.map(item=>(
+                  <div key={item.id} className={`ci ${checked[item.id]?"ck":""}`} onClick={()=>toggle(item.id)}>
+                    <div className="cbox">{checked[item.id]&&"✓"}</div>
+                    <span className="citext">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {pct<100&&<div style={{fontSize:11,color:"#555",borderLeft:"2px solid #8a7030",paddingLeft:12,marginTop:8,lineHeight:1.6}}>⚠ Il trade verrà salvato con {done}/{total} voci spuntate.</div>}
+    </div>
+  );
+}
+
+function TradeModal({data,isNew,onClose,onSave}){
+  const [notes,setNotes]=useState(data.notes||"");
+  const [outcome,setOutcome]=useState(data.outcome||"open");
+  const [pnl,setPnl]=useState(data.pnl||"");
+  const [exitPrice,setExitPrice]=useState(data.exitPrice||"");
+  const [checked,setChecked]=useState(data.checklist||{});
+  const ref=useRef(null);
+  const m=MODES[data.mode]||MODES.swing;
+  const {done,total,pct}=score(data.mode,checked);
+  useEffect(()=>{
+    const h=e=>{if(ref.current&&!ref.current.contains(e.target))onClose();};
+    document.addEventListener("mousedown",h);
+    return()=>document.removeEventListener("mousedown",h);
+  },[onClose]);
+  return(
+    <div className="overlay">
+      <div className="modal" ref={ref}>
+        {isNew
+          ?<><div className="modal-title" style={{color:"#c8a84b"}}>Registra Trade ✓</div><div className="modal-sub">Dati pre-compilati. Completa la checklist, aggiungi le note e salva.</div></>
+          :<><div className="modal-title">Aggiorna Trade</div><div className="modal-sub">Modifica checklist, note o chiudi con l'esito definitivo.</div></>
+        }
+        <div className="m-sec">
+          <div className="m-stitle">Dati del Trade</div>
+          <div className="pf-grid">
+            {[["Strumento",data.symbol||"—",null],["Tipologia",m.label,null],["Data",data.date,null],
+              ["Entry",data.entry,null],["Stop Loss",data.sl,"#e05c5c"],["Take Profit",data.tp,"#4caf7d"],
+              ["Lotti",(data.lots||"—")+" lot","#c8a84b"],["Rischio €",(data.riskEur||"—")+" €",null],
+              ["RR",(data.rr||"—")+"x",parseFloat(data.rr)>=m.rrMin?"#4caf7d":"#e05c5c"],
+            ].map(([label,val,color])=>(
+              <div key={label} className="pf-item">
+                <div className="pf-label">{label}</div>
+                <div className="pf-val" style={{color:color||"#c8a84b"}}>{val}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="m-sec">
+          <div className="m-stitle">Checklist {CHECKLISTS[data.mode]?.label||""} — {done}/{total} ({pct}%)</div>
+          <InlineChecklist mode={data.mode} checked={checked} onChange={setChecked}/>
+        </div>
+        <div className="m-sec">
+          <div className="m-stitle">Note del Setup</div>
+          <div className="field">
+            <textarea rows={3} style={{background:"#1a1a1a",border:"1px solid #2e2e2e",borderRadius:5,padding:"9px 11px",color:"#e8e8e8",outline:"none",resize:"vertical",width:"100%"}}
+              placeholder="Perché hai preso questo trade? OB identificato, CHoCH confermato, bias allineato..." value={notes} onChange={e=>setNotes(e.target.value)}/>
+          </div>
+        </div>
+        <div className="close-box">
+          <div className="close-box-title">Esito Trade</div>
+          {outcome==="open"&&<div className="open-notice">⏳ Rimarrà APERTO nel Journal — clicca sulla riga per aggiornarlo</div>}
+          <div className="out-row">
+            {["win","loss","open"].map(o=>(
+              <div key={o} className={`out-btn ${o} ${outcome===o?"on":""}`} onClick={()=>setOutcome(o)}>
+                {o==="win"?"✅ WIN":o==="loss"?"❌ LOSS":"⏳ APERTO"}
+              </div>
+            ))}
+          </div>
+          {outcome!=="open"&&(
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <div className="field"><label>Prezzo chiusura</label><input type="number" step="0.00001" value={exitPrice} onChange={e=>setExitPrice(e.target.value)}/></div>
+              <div className="field"><label>P&L (€)</label><input type="number" step="0.01" placeholder={outcome==="win"?"+250.00":"-50.00"} value={pnl} onChange={e=>setPnl(e.target.value)}/></div>
+            </div>
+          )}
+        </div>
+        <div className="brow" style={{marginTop:20}}>
+          <button className="btn btn-p" onClick={()=>onSave({...data,notes,outcome,pnl,exitPrice,checklist:checked,clScore:{done,total,pct}})}>
+            {outcome==="open"?"💾 Salva Aperto":"✅ Chiudi Trade"}
+          </button>
+          <button className="btn btn-g" onClick={onClose}>Annulla</button>
+        </div>
+        <div className="hint">💡 Clicca sulla riga nel Journal per riaprire e aggiornare in qualsiasi momento.</div>
+      </div>
+    </div>
+  );
+}
+
+function Calculator({onOpenModal}){
+  const [mode,setMode]=useState("swing");
+  const [capital,setCapital]=useState(10000);
+  const [riskPct,setRiskPct]=useState(1.0);
+  const [symbol,setSymbol]=useState("");
+  const [entry,setEntry]=useState("");
+  const [sl,setSl]=useState("");
+  const [tp,setTp]=useState("");
+  useEffect(()=>{setRiskPct(MODES[mode].risk);},[mode]);
+  const n=v=>parseFloat(v)||0;
+  const riskEur=capital*riskPct/100,slDist=Math.abs(n(sl)-n(entry)),tpDist=Math.abs(n(tp)-n(entry));
+  const rr=slDist>0?tpDist/slDist:0,lots=slDist>0?riskEur/(slDist*100000):0,units=slDist>0?Math.round(riskEur/slDist):0;
+  const rrOk=rr>=MODES[mode].rrMin,slOk=sl!==""&&n(sl)!==n(entry),tpOk=tp!==""&&n(tp)!==n(entry),ready=entry!==""&&slOk&&tpOk;
+  return(
+    <div>
+      <div className="modes">
+        {Object.entries(MODES).map(([k,m])=>(
+          <div key={k} className={`mode ${mode===k?"on":""}`} onClick={()=>setMode(k)}>
+            <span className="mlabel">{m.label}</span><span className="mmeta">{m.tf} · RR≥{m.rrMin}</span>
+          </div>
+        ))}
+      </div>
+      <div className="card">
+        <div className="ctitle">Parametri</div>
+        <div className="fgrid">
+          <div className="field"><label>Capitale (€)</label><input type="number" inputMode="decimal" value={capital} onChange={e=>setCapital(+e.target.value)}/></div>
+          <div className="field"><label>% Rischio</label><input type="number" inputMode="decimal" step="0.05" value={riskPct} onChange={e=>setRiskPct(+e.target.value)}/></div>
+          <div className="field"><label>Strumento</label><input type="text" placeholder="EUR/CAD" value={symbol} onChange={e=>setSymbol(e.target.value)}/></div>
+          <div className="field"><label>Entry</label><input type="number" inputMode="decimal" step="0.00001" placeholder="1.61500" value={entry} onChange={e=>setEntry(e.target.value)}/></div>
+          <div className="field"><label>Stop Loss</label><input type="number" inputMode="decimal" step="0.00001" placeholder="1.62000" value={sl} onChange={e=>setSl(e.target.value)}/></div>
+          <div className="field"><label>Take Profit</label><input type="number" inputMode="decimal" step="0.00001" placeholder="1.60500" value={tp} onChange={e=>setTp(e.target.value)}/></div>
+        </div>
+      </div>
+      <div className="card">
+        <div className="ctitle">Risultati</div>
+        <div className="rgrid">
+          <div className="rbox hi"><div className="rlabel">Size Forex</div><div className="rval">{slDist>0?lots.toFixed(2):"—"}<span className="runit">lot</span></div></div>
+          <div className="rbox"><div className="rlabel">Unità/CFD</div><div className="rval">{slDist>0?units.toLocaleString():"—"}</div></div>
+          <div className="rbox"><div className="rlabel">Rischio €</div><div className="rval">{riskEur.toFixed(0)}<span className="runit">€</span></div></div>
+          <div className={`rbox ${rrOk?"gd":"bd"}`}><div className="rlabel">RR Effettivo</div><div className="rval">{slDist>0?rr.toFixed(2):"—"}<span className="runit">x</span></div></div>
+          <div className="rbox"><div className="rlabel">Dist. SL</div><div className="rval" style={{fontSize:14}}>{slDist>0?slDist.toFixed(5):"—"}</div></div>
+          <div className="rbox"><div className="rlabel">Dist. TP</div><div className="rval" style={{fontSize:14}}>{tpDist>0?tpDist.toFixed(5):"—"}</div></div>
+        </div>
+        <div style={{marginTop:12}}>
+          <div className={`alert ${rrOk?"ok":"warn"}`}>{rrOk?"✅":"❌"} RR {rr>0?rr.toFixed(2)+"x":"—"} — min {MODES[mode].rrMin}x per {MODES[mode].label}</div>
+          <div className={`alert ${slOk?"ok":"warn"}`}>{slOk?"✅":"⚠"} SL {slOk?"definito":"non definito"}</div>
+          <div className={`alert ${tpOk?"ok":"warn"}`}>{tpOk?"✅":"⚠"} TP {tpOk?"definito":"non definito"}</div>
+          <div className="alert info">ℹ Conto residuo dopo stop: {(capital-riskEur).toFixed(2)}€</div>
+        </div>
+        <div className="brow">
+          <button className="btn btn-p" disabled={!ready} onClick={()=>onOpenModal({mode,symbol,entry:n(entry),sl:n(sl),tp:n(tp),riskPct,riskEur:riskEur.toFixed(2),lots:lots.toFixed(2),rr:rr.toFixed(2),date:new Date().toISOString().slice(0,10),outcome:"open",pnl:"",notes:"",exitPrice:"",checklist:{},clScore:{done:0,total:getAllIds(mode).length,pct:0}})}>
+            + Registra nel Journal
+          </button>
+          {!ready&&<span style={{fontSize:11,color:"#555"}}>Compila entry, SL e TP</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Journal({refreshKey,onCountChange}){
+  const [trades,setTrades]=useState([]);
+  const [editTrade,setEditTrade]=useState(null);
+  const reload=()=>{const t=loadTrades();setTrades(t);onCountChange(t.filter(x=>x.outcome==="open").length);};
+  useEffect(()=>{reload();},[refreshKey]);
+  const handleSave=(updated)=>{
+    const list=trades.map(t=>t.id===updated.id?{...updated,updatedAt:new Date().toISOString()}:t);
+    setTrades(list);saveTrades(list);onCountChange(list.filter(x=>x.outcome==="open").length);setEditTrade(null);
+  };
+  const remove=(id,e)=>{e.stopPropagation();const list=trades.filter(t=>t.id!==id);setTrades(list);saveTrades(list);onCountChange(list.filter(x=>x.outcome==="open").length);};
+  const wins=trades.filter(t=>t.outcome==="win").length,losses=trades.filter(t=>t.outcome==="loss").length;
+  const openN=trades.filter(t=>t.outcome==="open").length,totalPnl=trades.reduce((a,t)=>a+(parseFloat(t.pnl)||0),0);
+  const wr=(wins+losses)>0?((wins/(wins+losses))*100).toFixed(0):"—";
+  return(
+    <div>
+      {editTrade&&<TradeModal data={editTrade} isNew={false} onClose={()=>setEditTrade(null)} onSave={handleSave}/>}
+      <div className="srow">
+        <div className="sbox"><div className="slabel">Totali</div><div className="sval">{trades.length}</div></div>
+        <div className="sbox"><div className="slabel">⏳ Aperti</div><div className="sval" style={{color:"#c8a84b"}}>{openN}</div></div>
+        <div className="sbox"><div className="slabel">Win Rate</div><div className="sval" style={{color:"#4caf7d"}}>{wr}{wr!=="—"?"%":""}</div></div>
+        <div className="sbox"><div className="slabel">Wins</div><div className="sval" style={{color:"#4caf7d"}}>{wins}</div></div>
+        <div className="sbox"><div className="slabel">Losses</div><div className="sval" style={{color:"#e05c5c"}}>{losses}</div></div>
+        <div className="sbox"><div className="slabel">P&L</div><div className="sval" style={{color:totalPnl>=0?"#4caf7d":"#e05c5c"}}>{totalPnl>=0?"+":""}{totalPnl.toFixed(0)}€</div></div>
+      </div>
+      {openN>0&&<div style={{background:"rgba(200,168,75,.06)",border:"1px solid #8a7030",borderRadius:8,padding:"12px 16px",marginBottom:16,fontSize:12,color:"#c8a84b"}}>⏳ Hai <strong>{openN}</strong> trade {openN===1?"aperto":"aperti"} — tocca la riga per aggiornare.</div>}
+      {trades.length===0
+        ?<div className="empty"><div className="empty-icon">📋</div>Nessun trade ancora.<br/>Usa il calcolatore per iniziare.</div>
+        :<div className="card" style={{padding:0,overflow:"hidden"}}>
+          <div className="mobile-scroll">
+            <table className="jtable">
+              <thead><tr>
+                <th>Data</th><th>Pair</th><th>Tipo</th><th>Lotti</th><th>RR</th><th>✅</th><th>Esito</th><th>P&L</th><th></th>
+              </tr></thead>
+              <tbody>
+                {trades.map(t=>(
+                  <tr key={t.id} className={t.outcome==="open"?"open-row":""} onClick={()=>setEditTrade(t)}>
+                    <td style={{color:"#999"}}>{t.date}</td>
+                    <td style={{fontWeight:"bold"}}>{t.symbol||"—"}</td>
+                    <td><span className={`tag t-${t.mode}`}>{MODES[t.mode]?.label||t.mode}</span></td>
+                    <td>{t.lots?t.lots+" L":"—"}</td>
+                    <td style={{color:parseFloat(t.rr)>=(MODES[t.mode]?.rrMin||0)?"#4caf7d":"#e05c5c"}}>{t.rr?t.rr+"x":"—"}</td>
+                    <td><ScoreBadge mode={t.mode} checked={t.checklist||{}}/></td>
+                    <td><span className={`tag t-${t.outcome}`}>{t.outcome==="win"?"WIN":t.outcome==="loss"?"LOSS":"⏳"}</span></td>
+                    <td style={{color:parseFloat(t.pnl)>=0?"#4caf7d":"#e05c5c",fontWeight:"bold"}}>{t.pnl?(parseFloat(t.pnl)>=0?"+":"")+parseFloat(t.pnl).toFixed(0)+"€":"—"}</td>
+                    <td onClick={e=>remove(t.id,e)}><button className="del-btn">✕</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+      {trades.some(t=>t.notes)&&(
+        <div className="card" style={{marginTop:8}}>
+          <div className="ctitle">Note</div>
+          {trades.filter(t=>t.notes).map(t=>(
+            <div key={t.id} style={{borderLeft:"2px solid #8a7030",paddingLeft:12,marginBottom:12,fontSize:12,lineHeight:1.6}}>
+              <span style={{color:"#c8a84b",fontWeight:"bold"}}>{t.symbol} {t.date}</span>
+              <span className={`tag t-${t.mode}`} style={{marginLeft:8}}>{MODES[t.mode]?.label}</span>
+              <br/><span style={{color:"#999"}}>{t.notes}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ChecklistTab(){
+  const [mode,setMode]=useState("swing");
+  const [checked,setChecked]=useState({});
+  const {done,total,pct}=score(mode,checked);
+  return(
+    <div>
+      <div className="modes" style={{marginBottom:20}}>
+        {Object.entries(CHECKLISTS).map(([k,cl])=>(
+          <div key={k} className={`mode ${mode===k?"on":""}`} onClick={()=>{setMode(k);setChecked({});}}>
+            <span className="mlabel">{cl.label}</span><span className="mmeta">{MODES[k]?.tf}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+        <div style={{fontSize:11,color:"#999"}}>{done}/{total} voci · {pct}%</div>
+        <button className="btn btn-g" onClick={()=>setChecked({})} style={{fontSize:11,padding:"6px 14px"}}>Reset</button>
+      </div>
+      <InlineChecklist mode={mode} checked={checked} onChange={setChecked}/>
+      <div className={`cl-standalone-sum ${pct===100?"ok":"no"}`} style={{marginTop:16}}>
+        <span>{pct===100?"✅ Setup valido — puoi entrare":`❌ ${total-done} voci mancanti — Non entrare`}</span>
+        <span style={{fontSize:12,opacity:.8}}>{done}/{total}</span>
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const [tab,setTab]=useState("calc");
+  const [modal,setModal]=useState(null);
+  const [openCount,setOpenCount]=useState(0);
+  const [jKey,setJKey]=useState(0);
+  const handleSaveNew=(data)=>{
+    const current=loadTrades();
+    saveTrades([{...data,id:Date.now().toString(),createdAt:new Date().toISOString()},...current]);
+    setModal(null);setJKey(k=>k+1);setTab("journal");
+  };
+  return(
+    <>
+      {modal&&<TradeModal data={modal} isNew={true} onClose={()=>setModal(null)} onSave={handleSaveNew}/>}
+      <div className="wrap">
+        <div className="hdr">
+          <div className="htitle">TRADING DESK</div>
+          <div className="hsub">Prop 10.000€ · Schemi Istituzionali</div>
+        </div>
+        <div className="tabs">
+          <button className={`tab ${tab==="calc"?"on":""}`} onClick={()=>setTab("calc")}>⚖ Size</button>
+          <button className={`tab ${tab==="journal"?"on":""}`} onClick={()=>setTab("journal")}>
+            📋 Journal{openCount>0&&<span className="tab-badge">{openCount}</span>}
+          </button>
+          <button className={`tab ${tab==="checklist"?"on":""}`} onClick={()=>setTab("checklist")}>✅ Check</button>
+        </div>
+        {tab==="calc"&&<Calculator onOpenModal={setModal}/>}
+        {tab==="journal"&&<Journal refreshKey={jKey} onCountChange={setOpenCount}/>}
+        {tab==="checklist"&&<ChecklistTab/>}
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
