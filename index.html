@@ -9,147 +9,183 @@
   <meta name="theme-color" content="#c8a84b"/>
   <title>Trading Desk</title>
   <link rel="manifest" href="manifest.json"/>
-  <script>
-    if('serviceWorker' in navigator){
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js');
-      });
-    }
-  </script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:#0a0a0a;color:#e8e8e8;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5;min-height:100vh;}
-    ::-webkit-scrollbar{width:4px;height:4px;}
-    ::-webkit-scrollbar-track{background:#0a0a0a;}
-    ::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+    ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:#0a0a0a;}::-webkit-scrollbar-thumb{background:#333;border-radius:2px;}
     input,select,textarea{font-family:'JetBrains Mono',monospace;font-size:13px;}
-    .wrap{max-width:1200px;margin:0 auto;padding:env(safe-area-inset-top, 24px) 16px 24px;}
-    .hdr{display:flex;align-items:baseline;gap:16px;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid #222;}
-    .htitle{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#c8a84b;letter-spacing:-0.5px;}
-    .hsub{font-size:11px;color:#555;letter-spacing:.05em;}
-    .tabs{display:flex;gap:2px;margin-bottom:22px;background:#111;border:1px solid #222;border-radius:8px;padding:4px;}
-    .tab{flex:1;padding:10px 8px;border:none;background:transparent;color:#999;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:5px;transition:all .18s;}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px 14px 40px;}
+    .hdr{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid #1e1e1e;}
+    .htitle{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#c8a84b;letter-spacing:-.5px;}
+    .hsub{font-size:10px;color:#444;letter-spacing:.05em;}
+    .tabs{display:flex;gap:2px;margin-bottom:20px;background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:3px;overflow-x:auto;}
+    .tab{flex:1;min-width:60px;padding:9px 6px;border:none;background:transparent;color:#666;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:5px;transition:all .15s;white-space:nowrap;}
     .tab.on{background:#c8a84b;color:#0a0a0a;}
-    .tab-badge{display:inline-block;background:#e05c5c;color:#fff;border-radius:10px;font-size:9px;padding:1px 6px;margin-left:5px;font-weight:800;vertical-align:middle;}
-    .card{background:#111;border:1px solid #222;border-radius:8px;padding:20px;margin-bottom:16px;}
-    .ctitle{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-    .ctitle::before{content:'';display:block;width:3px;height:12px;background:#c8a84b;border-radius:2px;}
-    .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:14px;}
-    .field{display:flex;flex-direction:column;gap:5px;}
-    .field label{font-size:10px;color:#999;letter-spacing:.08em;text-transform:uppercase;}
-    .field input,.field select,.field textarea{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:5px;padding:9px 11px;color:#e8e8e8;outline:none;transition:border-color .15s;width:100%;}
+    .tab-badge{display:inline-block;background:#e05c5c;color:#fff;border-radius:10px;font-size:8px;padding:1px 5px;margin-left:4px;font-weight:800;vertical-align:middle;}
+    .card{background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:18px;margin-bottom:14px;}
+    .ctitle{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#666;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .ctitle::before{content:'';display:block;width:3px;height:11px;background:#c8a84b;border-radius:2px;}
+    .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px;}
+    .fgrid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+    .fgrid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+    .field{display:flex;flex-direction:column;gap:4px;}
+    .field label{font-size:10px;color:#666;letter-spacing:.07em;text-transform:uppercase;}
+    .field input,.field select,.field textarea{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:5px;padding:8px 10px;color:#e8e8e8;outline:none;transition:border-color .15s;width:100%;}
     .field input:focus,.field select:focus,.field textarea:focus{border-color:#c8a84b;}
     .field select option{background:#1a1a1a;}
-    .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
-    .mode{padding:12px 8px;border:1px solid #2e2e2e;background:#1a1a1a;color:#999;border-radius:6px;cursor:pointer;text-align:center;transition:all .18s;}
-    .mode.on{border-color:#c8a84b;background:rgba(200,168,75,0.12);color:#c8a84b;}
-    .mlabel{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;display:block;}
-    .mmeta{font-size:10px;opacity:.7;display:block;margin-top:2px;}
-    .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-top:16px;}
-    .rbox{background:#1a1a1a;border:1px solid #222;border-radius:6px;padding:14px;}
-    .rlabel{font-size:10px;color:#999;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
-    .rval{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
-    .runit{font-size:11px;color:#999;margin-left:3px;}
-    .rbox.hi{border-color:#c8a84b;background:rgba(200,168,75,0.12);}.rbox.hi .rval{color:#c8a84b;}
+    .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px;}
+    .mode{padding:11px 7px;border:1px solid #2a2a2a;background:#1a1a1a;color:#666;border-radius:6px;cursor:pointer;text-align:center;transition:all .15s;}
+    .mode.on{border-color:#c8a84b;background:rgba(200,168,75,.1);color:#c8a84b;}
+    .mlabel{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:block;}
+    .mmeta{font-size:9px;opacity:.7;display:block;margin-top:2px;}
+    .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:14px;}
+    .rbox{background:#1a1a1a;border:1px solid #1e1e1e;border-radius:6px;padding:12px;}
+    .rlabel{font-size:9px;color:#666;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
+    .rval{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+    .runit{font-size:10px;color:#666;margin-left:2px;}
+    .rbox.hi{border-color:#c8a84b;background:rgba(200,168,75,.08);}.rbox.hi .rval{color:#c8a84b;}
     .rbox.gd .rval{color:#4caf7d;}.rbox.bd .rval{color:#e05c5c;}
-    .alert{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:5px;margin-top:8px;font-size:12px;}
-    .alert.ok{background:rgba(76,175,125,0.15);color:#4caf7d;}
-    .alert.warn{background:rgba(224,92,92,0.15);color:#e05c5c;}
-    .alert.info{background:rgba(91,155,213,0.15);color:#5b9bd5;}
-    .btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;transition:all .18s;}
-    .btn:disabled{opacity:.35;cursor:not-allowed;}
+    .alert{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:5px;margin-top:7px;font-size:11px;}
+    .alert.ok{background:rgba(76,175,125,.12);color:#4caf7d;}.alert.warn{background:rgba(224,92,92,.12);color:#e05c5c;}.alert.info{background:rgba(91,155,213,.12);color:#5b9bd5;}
+    .btn{padding:9px 18px;border:none;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;transition:all .15s;}
+    .btn:disabled{opacity:.3;cursor:not-allowed;}
     .btn-p{background:#c8a84b;color:#0a0a0a;}.btn-p:active{background:#e0bc56;}
-    .btn-g{background:transparent;border:1px solid #2e2e2e;color:#999;}
-    .brow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px;}
-    .srow{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:20px;}
-    .sbox{background:#111;border:1px solid #222;border-radius:6px;padding:14px;}
-    .slabel{font-size:10px;color:#555;letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px;}
-    .sval{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#e8e8e8;}
+    .btn-g{background:transparent;border:1px solid #2a2a2a;color:#666;}.btn-g:hover{border-color:#c8a84b;color:#c8a84b;}
+    .btn-sm{padding:5px 12px;font-size:10px;}
+    .brow{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px;}
+    /* STATS */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:16px;}
+    .kpi{background:#111;border:1px solid #1e1e1e;border-radius:7px;padding:12px 14px;}
+    .kpi-label{font-size:9px;color:#555;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px;}
+    .kpi-val{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:#e8e8e8;}
+    .kpi-val.up{color:#4caf7d;}.kpi-val.dn{color:#e05c5c;}.kpi-val.ac{color:#c8a84b;}
+    /* TABLE */
     .mobile-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    .jtable{width:100%;border-collapse:collapse;font-size:12px;}
-    .jtable th{text-align:left;padding:8px 10px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#555;border-bottom:1px solid #222;font-family:'Syne',sans-serif;font-weight:700;white-space:nowrap;}
-    .jtable td{padding:9px 10px;border-bottom:1px solid #222;vertical-align:middle;white-space:nowrap;}
+    .jtable{width:100%;border-collapse:collapse;font-size:11px;}
+    .jtable th{text-align:left;padding:7px 9px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#444;border-bottom:1px solid #1e1e1e;font-family:'Syne',sans-serif;font-weight:700;white-space:nowrap;}
+    .jtable td{padding:8px 9px;border-bottom:1px solid #1a1a1a;vertical-align:middle;white-space:nowrap;}
     .jtable tr:last-child td{border-bottom:none;}
-    .jtable tr.open-row td{background:rgba(200,168,75,0.04);}
-    .tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.06em;}
-    .t-scalp{background:rgba(91,155,213,.2);color:#5b9bd5;}
-    .t-intraday{background:rgba(200,168,75,.2);color:#c8a84b;}
-    .t-swing{background:rgba(76,175,125,.2);color:#4caf7d;}
-    .t-win{background:rgba(76,175,125,0.15);color:#4caf7d;}
-    .t-loss{background:rgba(224,92,92,0.15);color:#e05c5c;}
-    .t-open{background:rgba(200,168,75,.15);color:#c8a84b;animation:pulse 2s infinite;}
-    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
-    .del-btn{background:none;border:none;color:#555;cursor:pointer;font-size:14px;padding:4px 8px;border-radius:3px;transition:color .15s;line-height:1;}
-    .cl-score{display:inline-flex;align-items:center;padding:2px 9px;border-radius:3px;font-size:10px;font-family:'Syne',sans-serif;font-weight:700;}
-    .cl-score.full{background:rgba(76,175,125,0.15);color:#4caf7d;}
-    .cl-score.part{background:rgba(224,125,58,0.15);color:#e07d3a;}
-    .cl-score.none{background:rgba(150,150,150,.1);color:#555;}
+    .jtable tr.open-row td{background:rgba(200,168,75,.03);}
+    .jtable tr:hover td{background:#141414;cursor:pointer;}
+    .tag{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.05em;}
+    .t-scalp{background:rgba(91,155,213,.18);color:#5b9bd5;}.t-intraday{background:rgba(200,168,75,.18);color:#c8a84b;}
+    .t-swing{background:rgba(76,175,125,.18);color:#4caf7d;}
+    .t-win{background:rgba(76,175,125,.15);color:#4caf7d;}.t-loss{background:rgba(224,92,92,.15);color:#e05c5c;}
+    .t-open{background:rgba(200,168,75,.13);color:#c8a84b;animation:pulse 2s infinite;}
+    .t-long{background:rgba(76,175,125,.15);color:#4caf7d;}.t-short{background:rgba(224,92,92,.15);color:#e05c5c;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+    .del-btn{background:none;border:none;color:#333;cursor:pointer;font-size:13px;padding:3px 7px;border-radius:3px;transition:color .15s;}
+    .del-btn:hover{color:#e05c5c;}
+    /* SCORE */
+    .cl-score{display:inline-flex;align-items:center;padding:2px 8px;border-radius:3px;font-size:9px;font-family:'Syne',sans-serif;font-weight:700;}
+    .cl-score.full{background:rgba(76,175,125,.15);color:#4caf7d;}.cl-score.part{background:rgba(224,125,58,.15);color:#e07d3a;}.cl-score.none{background:rgba(100,100,100,.1);color:#444;}
+    /* CHECKLIST */
     .cl-wrap{margin-top:4px;}
-    .cl-sec{margin-bottom:8px;}
-    .cl-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#1a1a1a;border:1px solid #222;border-radius:6px 6px 0 0;cursor:pointer;user-select:none;}
+    .cl-sec{margin-bottom:7px;}
+    .cl-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:#1a1a1a;border:1px solid #1e1e1e;border-radius:6px 6px 0 0;cursor:pointer;user-select:none;}
     .cl-hdr.done{border-color:#4caf7d;}
-    .cl-hdr-l{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .cl-hdr-l{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
     .cl-stitle{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;}
-    .cl-tf{font-size:9px;color:#555;background:#0a0a0a;border:1px solid #222;padding:2px 7px;border-radius:3px;}
-    .cl-items{border:1px solid #222;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;}
-    .ci{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid #222;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
-    .ci:last-child{border-bottom:none;}.ci.ck{background:rgba(76,175,125,.04);}
-    .cbox{width:18px;height:18px;min-width:18px;border:1.5px solid #2e2e2e;border-radius:3px;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:10px;}
+    .cl-tf{font-size:9px;color:#444;background:#0a0a0a;border:1px solid #1e1e1e;padding:2px 6px;border-radius:3px;}
+    .cl-items{border:1px solid #1e1e1e;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;}
+    .ci{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border-bottom:1px solid #1a1a1a;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+    .ci:last-child{border-bottom:none;}.ci.ck{background:rgba(76,175,125,.03);}
+    .cbox{width:16px;height:16px;min-width:16px;border:1.5px solid #2a2a2a;border-radius:3px;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:9px;}
     .ci.ck .cbox{background:#4caf7d;border-color:#4caf7d;color:white;}
-    .citext{font-size:12px;line-height:1.5;color:#e8e8e8;flex:1;}
-    .ci.ck .citext{color:#999;text-decoration:line-through;}
-    .cl-bar-wrap{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:6px;margin-bottom:10px;font-size:12px;}
-    .cl-bar-wrap.all{background:rgba(76,175,125,0.15);border:1px solid #4caf7d;color:#4caf7d;}
-    .cl-bar-wrap.part{background:rgba(224,125,58,0.15);border:1px solid #e07d3a;color:#e07d3a;}
-    .cl-bar-wrap.none{background:rgba(150,150,150,.07);border:1px solid #222;color:#999;}
-    .cl-track{height:4px;background:#222;border-radius:2px;flex:1;margin:0 12px;}
+    .citext{font-size:11px;line-height:1.5;color:#e8e8e8;flex:1;}.ci.ck .citext{color:#555;text-decoration:line-through;}
+    .cl-bar-wrap{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-radius:6px;margin-bottom:9px;font-size:11px;}
+    .cl-bar-wrap.all{background:rgba(76,175,125,.12);border:1px solid #4caf7d;color:#4caf7d;}
+    .cl-bar-wrap.part{background:rgba(224,125,58,.12);border:1px solid #e07d3a;color:#e07d3a;}
+    .cl-bar-wrap.none{background:rgba(100,100,100,.06);border:1px solid #1e1e1e;color:#666;}
+    .cl-track{height:3px;background:#1e1e1e;border-radius:2px;flex:1;margin:0 11px;}
     .cl-fill{height:100%;border-radius:2px;transition:width .3s;}
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-    .modal{background:#111;border:1px solid #2e2e2e;border-radius:12px;width:100%;max-width:700px;margin:auto;padding:24px;animation:su .2s ease;}
-    @keyframes su{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-    .modal-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;margin-bottom:4px;}
-    .modal-sub{font-size:11px;color:#999;margin-bottom:20px;line-height:1.6;}
-    .m-sec{margin-bottom:20px;}
-    .m-stitle{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #222;}
-    .pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-    .pf-item{background:#1a1a1a;border:1px solid #222;border-radius:5px;padding:10px;}
-    .pf-label{font-size:9px;color:#555;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px;}
-    .pf-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
-    .open-notice{display:flex;align-items:center;gap:8px;background:rgba(200,168,75,.08);border:1px solid #8a7030;color:#c8a84b;border-radius:6px;padding:10px 14px;font-size:12px;margin-bottom:12px;}
-    .close-box{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:8px;padding:16px;}
-    .close-box-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:#999;margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase;}
-    .out-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-    .out-btn{padding:12px 8px;border:1px solid #2e2e2e;background:#0a0a0a;color:#999;border-radius:5px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-align:center;transition:all .15s;-webkit-tap-highlight-color:transparent;}
-    .out-btn.win.on{border-color:#4caf7d;background:rgba(76,175,125,0.15);color:#4caf7d;}
-    .out-btn.loss.on{border-color:#e05c5c;background:rgba(224,92,92,0.15);color:#e05c5c;}
-    .out-btn.open.on{border-color:#c8a84b;background:rgba(200,168,75,0.12);color:#c8a84b;}
-    .hint{font-size:11px;color:#555;border-left:2px solid #8a7030;padding:8px 12px;border-radius:0 4px 4px 0;margin-top:14px;line-height:1.6;}
-    .cl-standalone-sum{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-radius:8px;margin-top:14px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;}
-    .cl-standalone-sum.ok{background:rgba(76,175,125,0.15);border:1px solid #4caf7d;color:#4caf7d;}
-    .cl-standalone-sum.no{background:rgba(224,92,92,0.15);border:1px solid #e05c5c;color:#e05c5c;}
-    .empty{text-align:center;padding:48px 24px;color:#555;font-size:12px;}
-    .empty-icon{font-size:32px;margin-bottom:10px;}
+    .cl-standalone-sum{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-radius:8px;margin-top:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;}
+    .cl-standalone-sum.ok{background:rgba(76,175,125,.12);border:1px solid #4caf7d;color:#4caf7d;}
+    .cl-standalone-sum.no{background:rgba(224,92,92,.12);border:1px solid #e05c5c;color:#e05c5c;}
+    /* MODAL */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    .modal{background:#111;border:1px solid #2a2a2a;border-radius:12px;width:100%;max-width:720px;margin:auto;padding:22px;animation:su .2s ease;}
+    @keyframes su{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:3px;}
+    .modal-sub{font-size:11px;color:#666;margin-bottom:18px;line-height:1.6;}
+    .m-sec{margin-bottom:18px;}
+    .m-stitle{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#444;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid #1e1e1e;}
+    .pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+    .pf-item{background:#1a1a1a;border:1px solid #1e1e1e;border-radius:5px;padding:9px;}
+    .pf-label{font-size:8px;color:#444;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px;}
+    .pf-val{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+    .open-notice{display:flex;align-items:center;gap:7px;background:rgba(200,168,75,.07);border:1px solid #8a7030;color:#c8a84b;border-radius:6px;padding:9px 13px;font-size:11px;margin-bottom:11px;}
+    .close-box{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:14px;}
+    .close-box-title{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:#666;margin-bottom:11px;letter-spacing:.08em;text-transform:uppercase;}
+    .out-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;}
+    .out-btn{padding:11px 7px;border:1px solid #2a2a2a;background:#0a0a0a;color:#666;border-radius:5px;cursor:pointer;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;text-align:center;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+    .out-btn.win.on{border-color:#4caf7d;background:rgba(76,175,125,.12);color:#4caf7d;}
+    .out-btn.loss.on{border-color:#e05c5c;background:rgba(224,92,92,.12);color:#e05c5c;}
+    .out-btn.open.on{border-color:#c8a84b;background:rgba(200,168,75,.1);color:#c8a84b;}
+    .hint{font-size:10px;color:#444;border-left:2px solid #8a7030;padding:7px 11px;border-radius:0 4px 4px 0;margin-top:12px;line-height:1.6;}
+    /* ANALYSIS */
+    .atab-row{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap;}
+    .atab{padding:7px 14px;border:1px solid #2a2a2a;background:#1a1a1a;color:#666;border-radius:5px;cursor:pointer;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;transition:all .15s;}
+    .atab.on{border-color:#c8a84b;background:rgba(200,168,75,.1);color:#c8a84b;}
+    .stat-table{width:100%;border-collapse:collapse;font-size:11px;}
+    .stat-table th{text-align:left;padding:7px 10px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#444;border-bottom:1px solid #1e1e1e;font-family:'Syne',sans-serif;font-weight:700;}
+    .stat-table td{padding:9px 10px;border-bottom:1px solid #1a1a1a;vertical-align:middle;}
+    .stat-table tr:last-child td{border-bottom:none;}
+    /* EMOJI RATING */
+    .emo-row{display:flex;gap:8px;flex-wrap:wrap;}
+    .emo-btn{padding:8px 12px;border:1px solid #2a2a2a;background:#1a1a1a;border-radius:5px;cursor:pointer;font-size:16px;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+    .emo-btn.on{border-color:#c8a84b;background:rgba(200,168,75,.1);}
+    .empty{text-align:center;padding:40px 20px;color:#444;font-size:12px;}
+    .empty-icon{font-size:28px;margin-bottom:9px;}
+    .divider{height:1px;background:#1e1e1e;margin:16px 0;}
+    .section-badge{display:inline-block;padding:3px 10px;background:rgba(200,168,75,.1);border:1px solid #8a7030;color:#c8a84b;border-radius:4px;font-size:10px;font-family:'Syne',sans-serif;font-weight:700;margin-bottom:12px;}
     @media(max-width:600px){
-      .modes{grid-template-columns:1fr 1fr;}
-      .pf-grid{grid-template-columns:1fr 1fr;}
-      .rgrid{grid-template-columns:1fr 1fr;}
+      .modes,.pf-grid,.fgrid-3{grid-template-columns:1fr 1fr;}
       .fgrid{grid-template-columns:1fr 1fr;}
-      .wrap{padding:16px 12px 32px;}
-      .htitle{font-size:18px;}
-      .tab{font-size:10px;padding:9px 4px;letter-spacing:.04em;}
-      .modal{padding:18px;}
+      .rgrid{grid-template-columns:1fr 1fr;}
+      .wrap{padding:12px 10px 40px;}
+      .htitle{font-size:17px;}
+      .tab{font-size:9px;padding:8px 4px;}
+      .modal{padding:16px;}
+      .kpi-grid{grid-template-columns:repeat(3,1fr);}
     }
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect, useRef } = React;
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const MODES = {
+  scalp:    {label:"Scalping",  tf:"M1/M5",    risk:0.25, rrMin:2},
+  intraday: {label:"Intraday",  tf:"M15/H1",   risk:0.5,  rrMin:3},
+  swing:    {label:"Swing",     tf:"H4/Daily",  risk:1.0,  rrMin:4},
+};
+
+const SETUPS = [
+  "Schema Istituzionale (Sweep + OB)",
+  "Sweep + FVG",
+  "CHoCH + OB",
+  "CHoCH + FVG",
+  "BOS + OB",
+  "Reversal",
+  "Trend Following",
+  "Breakout",
+  "Pullback",
+  "Range Trading",
+  "Support/Resistance",
+  "Pattern",
+];
+
+const ASSETS = ["NASDAQ","DAX","S&P 500","DOW JONES","RUSSELL 2000","FTSE MIB","EUR/USD","GBP/USD","USD/JPY","AUD/USD","GOLD","OIL","BTC","ETH","Altro"];
+const TIMEFRAMES = ["M1","M5","M10","M15","M30","H1","H2","H4","H8","Daily","Weekly"];
+const EMOTIONS = ["😤","😟","😐","🙂","😊"];
 
 const CHECKLISTS = {
   scalp: { label:"Scalping", sections:[
@@ -248,17 +284,47 @@ const CHECKLISTS = {
   ]},
 };
 
-const MODES = {
-  scalp:    {label:"Scalping",  tf:"M1/M5",    risk:0.25, rrMin:2},
-  intraday: {label:"Intraday",  tf:"M15/H1",   risk:0.5,  rrMin:3},
-  swing:    {label:"Swing",     tf:"H4/Daily",  risk:1.0,  rrMin:4},
-};
-
 function getAllIds(mode){ return (CHECKLISTS[mode]?.sections||[]).flatMap(s=>s.items.map(i=>i.id)); }
 function score(mode,checked){ const ids=getAllIds(mode),done=ids.filter(id=>checked[id]).length; return {done,total:ids.length,pct:ids.length?Math.round(done/ids.length*100):0}; }
-function loadTrades(){ try{ return JSON.parse(localStorage.getItem("td_trades")||"[]"); }catch{ return []; } }
-function saveTrades(t){ try{ localStorage.setItem("td_trades",JSON.stringify(t)); }catch{} }
 
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+function loadTrades(){ try{ return JSON.parse(localStorage.getItem("td_v6")||"[]"); }catch{ return []; } }
+function saveTrades(t){ try{ localStorage.setItem("td_v6",JSON.stringify(t)); }catch{} }
+function loadSettings(){ try{ return JSON.parse(localStorage.getItem("td_settings")||"{}"); }catch{ return {}; } }
+function saveSettings(s){ try{ localStorage.setItem("td_settings",JSON.stringify(s)); }catch{} }
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function fmt(n,dec=2){ return n==null||isNaN(n)?"—":(+n).toFixed(dec); }
+function fmtEur(n){ if(n==null||isNaN(n)) return "—"; const v=+n; return (v>=0?"+":"")+v.toFixed(2)+"€"; }
+function fmtPct(n){ return n==null||isNaN(n)?"—":(+n).toFixed(1)+"%"; }
+
+function calcStats(trades){
+  const closed=trades.filter(t=>t.outcome!=="open");
+  const wins=closed.filter(t=>t.outcome==="win");
+  const losses=closed.filter(t=>t.outcome==="loss");
+  const pnlArr=closed.map(t=>parseFloat(t.pnlNetto)||0);
+  const totalPnl=pnlArr.reduce((a,b)=>a+b,0);
+  const winPnl=wins.reduce((a,t)=>a+(parseFloat(t.pnlNetto)||0),0);
+  const lossPnl=losses.reduce((a,t)=>a+(parseFloat(t.pnlNetto)||0),0);
+  const wr=closed.length?wins.length/closed.length*100:0;
+  const avgWin=wins.length?winPnl/wins.length:0;
+  const avgLoss=losses.length?lossPnl/losses.length:0;
+  const pf=lossPnl!==0?Math.abs(winPnl/lossPnl):winPnl>0?Infinity:0;
+  const rrArr=closed.filter(t=>t.rr>0).map(t=>parseFloat(t.rr)||0);
+  const avgRR=rrArr.length?rrArr.reduce((a,b)=>a+b,0)/rrArr.length:0;
+  // equity curve
+  const settings=loadSettings();
+  const capital=parseFloat(settings.capital)||10000;
+  let equity=capital,maxEq=capital,maxDD=0;
+  const curve=[{x:0,y:capital}];
+  closed.forEach((t,i)=>{ equity+=parseFloat(t.pnlNetto)||0; curve.push({x:i+1,y:+equity.toFixed(2)}); if(equity>maxEq)maxEq=equity; const dd=equity-maxEq; if(dd<maxDD)maxDD=dd; });
+  // consecutive
+  let maxCW=0,maxCL=0,cw=0,cl=0;
+  closed.forEach(t=>{ if(t.outcome==="win"){cw++;cl=0;if(cw>maxCW)maxCW=cw;}else{cl++;cw=0;if(cl>maxCL)maxCL=cl;} });
+  return {closed,wins,losses,totalPnl,winPnl,lossPnl,wr,avgWin,avgLoss,pf,avgRR,curve,maxDD,maxCW,maxCL,capital,currentCapital:capital+totalPnl};
+}
+
+// ── SCORE BADGE ───────────────────────────────────────────────────────────────
 function ScoreBadge({mode,checked}){
   const {done,total}=score(mode,checked||{});
   if(!total) return <span className="cl-score none">—</span>;
@@ -266,21 +332,20 @@ function ScoreBadge({mode,checked}){
   return <span className={`cl-score ${cls}`}>{done}/{total}</span>;
 }
 
+// ── INLINE CHECKLIST ──────────────────────────────────────────────────────────
 function InlineChecklist({mode,checked,onChange}){
   const cl=CHECKLISTS[mode];
   const [openSec,setOpenSec]=useState({});
   const {done,total,pct}=score(mode,checked);
-  if(!cl) return <div style={{color:"#555",fontSize:12,padding:"8px 0"}}>Checklist non disponibile.</div>;
+  if(!cl) return <div style={{color:"#444",fontSize:11,padding:"7px 0"}}>Checklist non disponibile.</div>;
   const toggle=id=>onChange({...checked,[id]:!checked[id]});
   const barColor=pct===100?"#4caf7d":pct>50?"#e07d3a":"#e05c5c";
   return(
     <div className="cl-wrap">
       <div className={`cl-bar-wrap ${pct===100?"all":pct>0?"part":"none"}`}>
-        <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:12,whiteSpace:"nowrap"}}>
-          {pct===100?"✅ Completata":`${done}/${total} voci`}
-        </span>
+        <span style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:11,whiteSpace:"nowrap"}}>{pct===100?"✅ Completata":`${done}/${total} voci`}</span>
         <div className="cl-track"><div className="cl-fill" style={{width:`${pct}%`,background:barColor}}/></div>
-        <span style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:13,whiteSpace:"nowrap"}}>{pct}%</span>
+        <span style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:12,whiteSpace:"nowrap"}}>{pct}%</span>
       </div>
       {cl.sections.map(sec=>{
         const sc=sec.items.filter(i=>checked[i.id]).length,sd=sc===sec.items.length;
@@ -289,118 +354,243 @@ function InlineChecklist({mode,checked,onChange}){
           <div key={sec.id} className="cl-sec">
             <div className={`cl-hdr ${sd?"done":""}`} onClick={()=>setOpenSec(p=>({...p,[sec.id]:!isOpen}))}>
               <div className="cl-hdr-l">
-                <span style={{fontSize:11,color:sd?"#4caf7d":"#555"}}>{sd?"✅":"○"}</span>
+                <span style={{fontSize:10,color:sd?"#4caf7d":"#444"}}>{sd?"✅":"○"}</span>
                 <span className="cl-stitle">{sec.title}</span>
                 <span className="cl-tf">{sec.tf}</span>
               </div>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:11,fontFamily:"'Syne',sans-serif",fontWeight:700,color:sd?"#4caf7d":"#999"}}>{sc}/{sec.items.length}</span>
-                <span style={{fontSize:10,color:"#555"}}>{isOpen?"▲":"▼"}</span>
+              <div style={{display:"flex",alignItems:"center",gap:7}}>
+                <span style={{fontSize:10,fontFamily:"'Syne',sans-serif",fontWeight:700,color:sd?"#4caf7d":"#666"}}>{sc}/{sec.items.length}</span>
+                <span style={{fontSize:9,color:"#444"}}>{isOpen?"▲":"▼"}</span>
               </div>
             </div>
-            {isOpen&&(
-              <div className="cl-items">
-                {sec.items.map(item=>(
-                  <div key={item.id} className={`ci ${checked[item.id]?"ck":""}`} onClick={()=>toggle(item.id)}>
-                    <div className="cbox">{checked[item.id]&&"✓"}</div>
-                    <span className="citext">{item.text}</span>
-                  </div>
-                ))}
+            {isOpen&&<div className="cl-items">{sec.items.map(item=>(
+              <div key={item.id} className={`ci ${checked[item.id]?"ck":""}`} onClick={()=>toggle(item.id)}>
+                <div className="cbox">{checked[item.id]&&"✓"}</div>
+                <span className="citext">{item.text}</span>
               </div>
-            )}
+            ))}</div>}
           </div>
         );
       })}
-      {pct<100&&<div style={{fontSize:11,color:"#555",borderLeft:"2px solid #8a7030",paddingLeft:12,marginTop:8,lineHeight:1.6}}>⚠ Il trade verrà salvato con {done}/{total} voci spuntate.</div>}
+      {pct<100&&<div style={{fontSize:10,color:"#444",borderLeft:"2px solid #8a7030",paddingLeft:11,marginTop:7,lineHeight:1.6}}>⚠ Il trade verrà salvato con {done}/{total} voci spuntate.</div>}
     </div>
   );
 }
 
+// ── TRADE MODAL ───────────────────────────────────────────────────────────────
 function TradeModal({data,isNew,onClose,onSave}){
-  const [notes,setNotes]=useState(data.notes||"");
-  const [outcome,setOutcome]=useState(data.outcome||"open");
-  const [pnl,setPnl]=useState(data.pnl||"");
-  const [exitPrice,setExitPrice]=useState(data.exitPrice||"");
-  const [checked,setChecked]=useState(data.checklist||{});
+  const [f,setF]=useState({
+    symbol: data.symbol||"",
+    tipo: data.tipo||"LONG",
+    mode: data.mode||"swing",
+    entry: data.entry||"",
+    sl: data.sl||"",
+    tp: data.tp||"",
+    lots: data.lots||"",
+    rr: data.rr||"",
+    riskEur: data.riskEur||"",
+    riskPct: data.riskPct||"",
+    dateEntry: data.dateEntry||new Date().toISOString().slice(0,10),
+    timeEntry: data.timeEntry||"",
+    dateExit: data.dateExit||"",
+    timeExit: data.timeExit||"",
+    exitPrice: data.exitPrice||"",
+    commissioni: data.commissioni||"0",
+    pnlLordo: data.pnlLordo||"",
+    punti: data.punti||"",
+    setup: data.setup||SETUPS[0],
+    timeframe: data.timeframe||"M15",
+    emotion: data.emotion||3,
+    notes: data.notes||"",
+    outcome: data.outcome||"open",
+    checklist: data.checklist||{},
+  });
+  const [tab,setTab]=useState("dati");
   const ref=useRef(null);
-  const m=MODES[data.mode]||MODES.swing;
-  const {done,total,pct}=score(data.mode,checked);
+  const m=MODES[f.mode]||MODES.swing;
+  const {done,total,pct}=score(f.mode,f.checklist);
+
+  const upd=(k,v)=>setF(p=>({...p,[k]:v}));
+
+  // auto calc pnl netto
+  const pnlNetto = f.pnlLordo!==""&&f.commissioni!==""
+    ? (+f.pnlLordo - +f.commissioni).toFixed(2)
+    : f.pnlLordo||"";
+
+  // auto calc punti
+  const calcPunti = f.entry!==""&&f.exitPrice!==""
+    ? Math.abs(+f.exitPrice - +f.entry).toFixed(2)
+    : "";
+
   useEffect(()=>{
     const h=e=>{if(ref.current&&!ref.current.contains(e.target))onClose();};
     document.addEventListener("mousedown",h);
     return()=>document.removeEventListener("mousedown",h);
   },[onClose]);
+
+  const handleSave=()=>{
+    const pnl = pnlNetto||"";
+    onSave({...f,pnlNetto:pnl,punti:calcPunti||f.punti,clScore:{done,total,pct}});
+  };
+
   return(
     <div className="overlay">
       <div className="modal" ref={ref}>
         {isNew
-          ?<><div className="modal-title" style={{color:"#c8a84b"}}>Registra Trade ✓</div><div className="modal-sub">Dati pre-compilati. Completa la checklist, aggiungi le note e salva.</div></>
-          :<><div className="modal-title">Aggiorna Trade</div><div className="modal-sub">Modifica checklist, note o chiudi con l'esito definitivo.</div></>
+          ?<><div className="modal-title" style={{color:"#c8a84b"}}>Registra Trade ✓</div><div className="modal-sub">Dati pre-compilati dal calcolatore. Completa i dettagli e salva.</div></>
+          :<><div className="modal-title">Aggiorna Trade</div><div className="modal-sub">Modifica i dati, completa la checklist o chiudi il trade.</div></>
         }
-        <div className="m-sec">
-          <div className="m-stitle">Dati del Trade</div>
-          <div className="pf-grid">
-            {[["Strumento",data.symbol||"—",null],["Tipologia",m.label,null],["Data",data.date,null],
-              ["Entry",data.entry,null],["Stop Loss",data.sl,"#e05c5c"],["Take Profit",data.tp,"#4caf7d"],
-              ["Lotti",(data.lots||"—")+" lot","#c8a84b"],["Rischio €",(data.riskEur||"—")+" €",null],
-              ["RR",(data.rr||"—")+"x",parseFloat(data.rr)>=m.rrMin?"#4caf7d":"#e05c5c"],
-            ].map(([label,val,color])=>(
-              <div key={label} className="pf-item">
-                <div className="pf-label">{label}</div>
-                <div className="pf-val" style={{color:color||"#c8a84b"}}>{val}</div>
+
+        {/* Sub-tabs */}
+        <div style={{display:"flex",gap:4,marginBottom:16,background:"#0a0a0a",borderRadius:6,padding:3}}>
+          {["dati","checklist","note"].map(t=>(
+            <button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"7px 4px",border:"none",background:tab===t?"#c8a84b":"transparent",color:tab===t?"#0a0a0a":"#666",borderRadius:4,cursor:"pointer",fontFamily:"'Syne',sans-serif",fontSize:10,fontWeight:700,letterSpacing:".06em",textTransform:"uppercase"}}>
+              {t==="dati"?"📊 Dati":t==="checklist"?`✅ Check (${pct}%)`:"📝 Note"}
+            </button>
+          ))}
+        </div>
+
+        {tab==="dati"&&(
+          <>
+            <div className="m-sec">
+              <div className="m-stitle">Identificazione</div>
+              <div className="fgrid-3">
+                <div className="field"><label>Strumento</label>
+                  <select value={f.symbol} onChange={e=>upd("symbol",e.target.value)}>
+                    <option value="">Seleziona...</option>
+                    {ASSETS.map(a=><option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+                <div className="field"><label>Tipo</label>
+                  <select value={f.tipo} onChange={e=>upd("tipo",e.target.value)}>
+                    <option value="LONG">LONG</option>
+                    <option value="SHORT">SHORT</option>
+                  </select>
+                </div>
+                <div className="field"><label>Modalità</label>
+                  <select value={f.mode} onChange={e=>upd("mode",e.target.value)}>
+                    {Object.entries(MODES).map(([k,m])=><option key={k} value={k}>{m.label}</option>)}
+                  </select>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-        <div className="m-sec">
-          <div className="m-stitle">Checklist {CHECKLISTS[data.mode]?.label||""} — {done}/{total} ({pct}%)</div>
-          <InlineChecklist mode={data.mode} checked={checked} onChange={setChecked}/>
-        </div>
-        <div className="m-sec">
-          <div className="m-stitle">Note del Setup</div>
-          <div className="field">
-            <textarea rows={3} style={{background:"#1a1a1a",border:"1px solid #2e2e2e",borderRadius:5,padding:"9px 11px",color:"#e8e8e8",outline:"none",resize:"vertical",width:"100%"}}
-              placeholder="Perché hai preso questo trade? OB identificato, CHoCH confermato, bias allineato..." value={notes} onChange={e=>setNotes(e.target.value)}/>
-          </div>
-        </div>
-        <div className="close-box">
-          <div className="close-box-title">Esito Trade</div>
-          {outcome==="open"&&<div className="open-notice">⏳ Rimarrà APERTO nel Journal — clicca sulla riga per aggiornarlo</div>}
-          <div className="out-row">
-            {["win","loss","open"].map(o=>(
-              <div key={o} className={`out-btn ${o} ${outcome===o?"on":""}`} onClick={()=>setOutcome(o)}>
-                {o==="win"?"✅ WIN":o==="loss"?"❌ LOSS":"⏳ APERTO"}
+              <div className="fgrid-2">
+                <div className="field"><label>Setup</label>
+                  <select value={f.setup} onChange={e=>upd("setup",e.target.value)}>
+                    {SETUPS.map(s=><option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="field"><label>Timeframe</label>
+                  <select value={f.timeframe} onChange={e=>upd("timeframe",e.target.value)}>
+                    {TIMEFRAMES.map(t=><option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
               </div>
-            ))}
-          </div>
-          {outcome!=="open"&&(
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-              <div className="field"><label>Prezzo chiusura</label><input type="number" step="0.00001" value={exitPrice} onChange={e=>setExitPrice(e.target.value)}/></div>
-              <div className="field"><label>P&L (€)</label><input type="number" step="0.01" placeholder={outcome==="win"?"+250.00":"-50.00"} value={pnl} onChange={e=>setPnl(e.target.value)}/></div>
             </div>
-          )}
-        </div>
-        <div className="brow" style={{marginTop:20}}>
-          <button className="btn btn-p" onClick={()=>onSave({...data,notes,outcome,pnl,exitPrice,checklist:checked,clScore:{done,total,pct}})}>
-            {outcome==="open"?"💾 Salva Aperto":"✅ Chiudi Trade"}
+
+            <div className="m-sec">
+              <div className="m-stitle">Prezzi & Size</div>
+              <div className="fgrid-3">
+                <div className="field"><label>Entry</label><input type="number" step="0.00001" value={f.entry} onChange={e=>upd("entry",e.target.value)}/></div>
+                <div className="field"><label>Stop Loss</label><input type="number" step="0.00001" value={f.sl} onChange={e=>upd("sl",e.target.value)}/></div>
+                <div className="field"><label>Take Profit</label><input type="number" step="0.00001" value={f.tp} onChange={e=>upd("tp",e.target.value)}/></div>
+                <div className="field"><label>Lotti</label><input type="number" step="0.01" value={f.lots} onChange={e=>upd("lots",e.target.value)}/></div>
+                <div className="field"><label>RR</label><input type="number" step="0.01" value={f.rr} onChange={e=>upd("rr",e.target.value)}/></div>
+                <div className="field"><label>Rischio €</label><input type="number" step="0.01" value={f.riskEur} onChange={e=>upd("riskEur",e.target.value)}/></div>
+              </div>
+            </div>
+
+            <div className="m-sec">
+              <div className="m-stitle">Date & Orari</div>
+              <div className="fgrid-2">
+                <div className="field"><label>Data Entrata</label><input type="date" value={f.dateEntry} onChange={e=>upd("dateEntry",e.target.value)}/></div>
+                <div className="field"><label>Ora Entrata</label><input type="time" value={f.timeEntry} onChange={e=>upd("timeEntry",e.target.value)}/></div>
+                <div className="field"><label>Data Uscita</label><input type="date" value={f.dateExit} onChange={e=>upd("dateExit",e.target.value)}/></div>
+                <div className="field"><label>Ora Uscita</label><input type="time" value={f.timeExit} onChange={e=>upd("timeExit",e.target.value)}/></div>
+              </div>
+            </div>
+
+            <div className="close-box">
+              <div className="close-box-title">Esito & P&L</div>
+              {f.outcome==="open"&&<div className="open-notice">⏳ Rimarrà APERTO nel Journal</div>}
+              <div className="out-row">
+                {["win","loss","open"].map(o=>(
+                  <div key={o} className={`out-btn ${o} ${f.outcome===o?"on":""}`} onClick={()=>upd("outcome",o)}>
+                    {o==="win"?"✅ WIN":o==="loss"?"❌ LOSS":"⏳ APERTO"}
+                  </div>
+                ))}
+              </div>
+              {f.outcome!=="open"&&(
+                <div className="fgrid-2">
+                  <div className="field"><label>Prezzo Uscita</label><input type="number" step="0.00001" value={f.exitPrice} onChange={e=>upd("exitPrice",e.target.value)}/></div>
+                  <div className="field"><label>Punti/Pips</label><input type="number" step="0.01" value={calcPunti||f.punti} readOnly={!!calcPunti} onChange={e=>upd("punti",e.target.value)}/></div>
+                  <div className="field"><label>P&L Lordo €</label><input type="number" step="0.01" placeholder={f.outcome==="win"?"+250.00":"-50.00"} value={f.pnlLordo} onChange={e=>upd("pnlLordo",e.target.value)}/></div>
+                  <div className="field"><label>Commissioni €</label><input type="number" step="0.01" value={f.commissioni} onChange={e=>upd("commissioni",e.target.value)}/></div>
+                </div>
+              )}
+              {f.outcome!=="open"&&pnlNetto!==""&&(
+                <div style={{background:"#0a0a0a",borderRadius:6,padding:"10px 13px",marginTop:9,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:".07em"}}>P&L Netto</span>
+                  <span style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:+pnlNetto>=0?"#4caf7d":"#e05c5c"}}>{fmtEur(pnlNetto)}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="m-sec" style={{marginTop:16}}>
+              <div className="m-stitle">Stato Emotivo</div>
+              <div className="emo-row">
+                {EMOTIONS.map((e,i)=>(
+                  <div key={i} className={`emo-btn ${f.emotion===i+1?"on":""}`} onClick={()=>upd("emotion",i+1)} title={["Pessimo","Negativo","Neutro","Positivo","Ottimo"][i]}>
+                    {e}
+                  </div>
+                ))}
+                <span style={{fontSize:11,color:"#666",alignSelf:"center",marginLeft:4}}>{["","Pessimo","Negativo","Neutro","Positivo","Ottimo"][f.emotion]||""}</span>
+              </div>
+            </div>
+          </>
+        )}
+
+        {tab==="checklist"&&(
+          <div className="m-sec">
+            <div className="m-stitle">Checklist {CHECKLISTS[f.mode]?.label||""} — {done}/{total} ({pct}%)</div>
+            <InlineChecklist mode={f.mode} checked={f.checklist} onChange={v=>upd("checklist",v)}/>
+          </div>
+        )}
+
+        {tab==="note"&&(
+          <div className="m-sec">
+            <div className="m-stitle">Note del Setup</div>
+            <div className="field">
+              <textarea rows={8} style={{background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:5,padding:"9px 11px",color:"#e8e8e8",outline:"none",resize:"vertical",width:"100%",lineHeight:1.6}}
+                placeholder="Perché hai preso questo trade? Struttura vista, OB identificato, CHoCH confermato, cosa avresti potuto fare meglio..." value={f.notes} onChange={e=>upd("notes",e.target.value)}/>
+            </div>
+          </div>
+        )}
+
+        <div className="brow" style={{marginTop:16}}>
+          <button className="btn btn-p" onClick={handleSave}>
+            {f.outcome==="open"?"💾 Salva Aperto":"✅ Chiudi Trade"}
           </button>
           <button className="btn btn-g" onClick={onClose}>Annulla</button>
+          {pct<100&&<span style={{fontSize:10,color:"#e07d3a"}}>⚠ Checklist {pct}%</span>}
         </div>
-        <div className="hint">💡 Clicca sulla riga nel Journal per riaprire e aggiornare in qualsiasi momento.</div>
+        <div className="hint">💡 Clicca sulla riga nel Journal per riaprire in qualsiasi momento.</div>
       </div>
     </div>
   );
 }
 
+// ── CALCULATOR ────────────────────────────────────────────────────────────────
 function Calculator({onOpenModal}){
+  const settings=loadSettings();
   const [mode,setMode]=useState("swing");
-  const [capital,setCapital]=useState(10000);
-  const [riskPct,setRiskPct]=useState(1.0);
+  const [capital,setCapital]=useState(parseFloat(settings.capital)||10000);
+  const [riskPct,setRiskPct]=useState(MODES.swing.risk);
   const [symbol,setSymbol]=useState("");
+  const [tipo,setTipo]=useState("LONG");
   const [entry,setEntry]=useState("");
   const [sl,setSl]=useState("");
   const [tp,setTp]=useState("");
-  useEffect(()=>{setRiskPct(MODES[mode].risk);},[mode]);
+  useEffect(()=>{ setRiskPct(MODES[mode].risk); },[mode]);
   const n=v=>parseFloat(v)||0;
   const riskEur=capital*riskPct/100,slDist=Math.abs(n(sl)-n(entry)),tpDist=Math.abs(n(tp)-n(entry));
   const rr=slDist>0?tpDist/slDist:0,lots=slDist>0?riskEur/(slDist*100000):0,units=slDist>0?Math.round(riskEur/slDist):0;
@@ -417,9 +607,19 @@ function Calculator({onOpenModal}){
       <div className="card">
         <div className="ctitle">Parametri</div>
         <div className="fgrid">
-          <div className="field"><label>Capitale (€)</label><input type="number" inputMode="decimal" value={capital} onChange={e=>setCapital(+e.target.value)}/></div>
+          <div className="field"><label>Capitale (€)</label><input type="number" inputMode="decimal" value={capital} onChange={e=>{setCapital(+e.target.value);saveSettings({...loadSettings(),capital:+e.target.value});}}/></div>
           <div className="field"><label>% Rischio</label><input type="number" inputMode="decimal" step="0.05" value={riskPct} onChange={e=>setRiskPct(+e.target.value)}/></div>
-          <div className="field"><label>Strumento</label><input type="text" placeholder="EUR/CAD" value={symbol} onChange={e=>setSymbol(e.target.value)}/></div>
+          <div className="field"><label>Strumento</label>
+            <select value={symbol} onChange={e=>setSymbol(e.target.value)}>
+              <option value="">Seleziona...</option>
+              {ASSETS.map(a=><option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+          <div className="field"><label>Tipo</label>
+            <select value={tipo} onChange={e=>setTipo(e.target.value)}>
+              <option value="LONG">LONG</option><option value="SHORT">SHORT</option>
+            </select>
+          </div>
           <div className="field"><label>Entry</label><input type="number" inputMode="decimal" step="0.00001" placeholder="1.61500" value={entry} onChange={e=>setEntry(e.target.value)}/></div>
           <div className="field"><label>Stop Loss</label><input type="number" inputMode="decimal" step="0.00001" placeholder="1.62000" value={sl} onChange={e=>setSl(e.target.value)}/></div>
           <div className="field"><label>Take Profit</label><input type="number" inputMode="decimal" step="0.00001" placeholder="1.60500" value={tp} onChange={e=>setTp(e.target.value)}/></div>
@@ -429,73 +629,101 @@ function Calculator({onOpenModal}){
         <div className="ctitle">Risultati</div>
         <div className="rgrid">
           <div className="rbox hi"><div className="rlabel">Size Forex</div><div className="rval">{slDist>0?lots.toFixed(2):"—"}<span className="runit">lot</span></div></div>
-          <div className="rbox"><div className="rlabel">Unità/CFD</div><div className="rval">{slDist>0?units.toLocaleString():"—"}</div></div>
+          <div className="rbox"><div className="rlabel">Unità/CFD</div><div className="rval" style={{fontSize:16}}>{slDist>0?units.toLocaleString():"—"}</div></div>
           <div className="rbox"><div className="rlabel">Rischio €</div><div className="rval">{riskEur.toFixed(0)}<span className="runit">€</span></div></div>
           <div className={`rbox ${rrOk?"gd":"bd"}`}><div className="rlabel">RR Effettivo</div><div className="rval">{slDist>0?rr.toFixed(2):"—"}<span className="runit">x</span></div></div>
           <div className="rbox"><div className="rlabel">Dist. SL</div><div className="rval" style={{fontSize:14}}>{slDist>0?slDist.toFixed(5):"—"}</div></div>
           <div className="rbox"><div className="rlabel">Dist. TP</div><div className="rval" style={{fontSize:14}}>{tpDist>0?tpDist.toFixed(5):"—"}</div></div>
         </div>
-        <div style={{marginTop:12}}>
+        <div style={{marginTop:11}}>
           <div className={`alert ${rrOk?"ok":"warn"}`}>{rrOk?"✅":"❌"} RR {rr>0?rr.toFixed(2)+"x":"—"} — min {MODES[mode].rrMin}x per {MODES[mode].label}</div>
           <div className={`alert ${slOk?"ok":"warn"}`}>{slOk?"✅":"⚠"} SL {slOk?"definito":"non definito"}</div>
           <div className={`alert ${tpOk?"ok":"warn"}`}>{tpOk?"✅":"⚠"} TP {tpOk?"definito":"non definito"}</div>
           <div className="alert info">ℹ Conto residuo dopo stop: {(capital-riskEur).toFixed(2)}€</div>
         </div>
         <div className="brow">
-          <button className="btn btn-p" disabled={!ready} onClick={()=>onOpenModal({mode,symbol,entry:n(entry),sl:n(sl),tp:n(tp),riskPct,riskEur:riskEur.toFixed(2),lots:lots.toFixed(2),rr:rr.toFixed(2),date:new Date().toISOString().slice(0,10),outcome:"open",pnl:"",notes:"",exitPrice:"",checklist:{},clScore:{done:0,total:getAllIds(mode).length,pct:0}})}>
-            + Registra nel Journal
-          </button>
-          {!ready&&<span style={{fontSize:11,color:"#555"}}>Compila entry, SL e TP</span>}
+          <button className="btn btn-p" disabled={!ready} onClick={()=>onOpenModal({
+            mode,symbol,tipo,entry:n(entry),sl:n(sl),tp:n(tp),
+            riskPct,riskEur:riskEur.toFixed(2),lots:lots.toFixed(2),rr:rr.toFixed(2),
+            dateEntry:new Date().toISOString().slice(0,10),
+            outcome:"open",pnlLordo:"",pnlNetto:"",commissioni:"0",
+            notes:"",exitPrice:"",checklist:{},setup:SETUPS[0],timeframe:"M15",emotion:3,
+          })}>+ Registra nel Journal</button>
+          {!ready&&<span style={{fontSize:10,color:"#444"}}>Compila entry, SL e TP</span>}
         </div>
       </div>
     </div>
   );
 }
 
+// ── JOURNAL ───────────────────────────────────────────────────────────────────
 function Journal({refreshKey,onCountChange}){
   const [trades,setTrades]=useState([]);
   const [editTrade,setEditTrade]=useState(null);
-  const reload=()=>{const t=loadTrades();setTrades(t);onCountChange(t.filter(x=>x.outcome==="open").length);};
-  useEffect(()=>{reload();},[refreshKey]);
+  const [filter,setFilter]=useState("all");
+  const reload=()=>{ const t=loadTrades(); setTrades(t); onCountChange(t.filter(x=>x.outcome==="open").length); };
+  useEffect(()=>{ reload(); },[refreshKey]);
   const handleSave=(updated)=>{
     const list=trades.map(t=>t.id===updated.id?{...updated,updatedAt:new Date().toISOString()}:t);
     setTrades(list);saveTrades(list);onCountChange(list.filter(x=>x.outcome==="open").length);setEditTrade(null);
   };
-  const remove=(id,e)=>{e.stopPropagation();const list=trades.filter(t=>t.id!==id);setTrades(list);saveTrades(list);onCountChange(list.filter(x=>x.outcome==="open").length);};
-  const wins=trades.filter(t=>t.outcome==="win").length,losses=trades.filter(t=>t.outcome==="loss").length;
-  const openN=trades.filter(t=>t.outcome==="open").length,totalPnl=trades.reduce((a,t)=>a+(parseFloat(t.pnl)||0),0);
+  const remove=(id,e)=>{ e.stopPropagation(); const list=trades.filter(t=>t.id!==id); setTrades(list);saveTrades(list);onCountChange(list.filter(x=>x.outcome==="open").length); };
+
+  const filtered=filter==="all"?trades:trades.filter(t=>t.outcome===filter||t.mode===filter);
+  const openN=trades.filter(t=>t.outcome==="open").length;
+  const totalPnl=trades.filter(t=>t.outcome!=="open").reduce((a,t)=>a+(parseFloat(t.pnlNetto)||0),0);
+  const wins=trades.filter(t=>t.outcome==="win").length;
+  const losses=trades.filter(t=>t.outcome==="loss").length;
   const wr=(wins+losses)>0?((wins/(wins+losses))*100).toFixed(0):"—";
+
   return(
     <div>
       {editTrade&&<TradeModal data={editTrade} isNew={false} onClose={()=>setEditTrade(null)} onSave={handleSave}/>}
-      <div className="srow">
-        <div className="sbox"><div className="slabel">Totali</div><div className="sval">{trades.length}</div></div>
-        <div className="sbox"><div className="slabel">⏳ Aperti</div><div className="sval" style={{color:"#c8a84b"}}>{openN}</div></div>
-        <div className="sbox"><div className="slabel">Win Rate</div><div className="sval" style={{color:"#4caf7d"}}>{wr}{wr!=="—"?"%":""}</div></div>
-        <div className="sbox"><div className="slabel">Wins</div><div className="sval" style={{color:"#4caf7d"}}>{wins}</div></div>
-        <div className="sbox"><div className="slabel">Losses</div><div className="sval" style={{color:"#e05c5c"}}>{losses}</div></div>
-        <div className="sbox"><div className="slabel">P&L</div><div className="sval" style={{color:totalPnl>=0?"#4caf7d":"#e05c5c"}}>{totalPnl>=0?"+":""}{totalPnl.toFixed(0)}€</div></div>
+      <div className="kpi-grid">
+        <div className="kpi"><div className="kpi-label">Totali</div><div className="kpi-val">{trades.length}</div></div>
+        <div className="kpi"><div className="kpi-label">⏳ Aperti</div><div className="kpi-val ac">{openN}</div></div>
+        <div className="kpi"><div className="kpi-label">Win Rate</div><div className="kpi-val up">{wr}{wr!=="—"?"%":""}</div></div>
+        <div className="kpi"><div className="kpi-label">Wins</div><div className="kpi-val up">{wins}</div></div>
+        <div className="kpi"><div className="kpi-label">Losses</div><div className="kpi-val dn">{losses}</div></div>
+        <div className="kpi"><div className="kpi-label">P&L Netto</div><div className={`kpi-val ${totalPnl>=0?"up":"dn"}`}>{totalPnl>=0?"+":""}{totalPnl.toFixed(0)}€</div></div>
       </div>
-      {openN>0&&<div style={{background:"rgba(200,168,75,.06)",border:"1px solid #8a7030",borderRadius:8,padding:"12px 16px",marginBottom:16,fontSize:12,color:"#c8a84b"}}>⏳ Hai <strong>{openN}</strong> trade {openN===1?"aperto":"aperti"} — tocca la riga per aggiornare.</div>}
+
+      {openN>0&&<div style={{background:"rgba(200,168,75,.05)",border:"1px solid #8a7030",borderRadius:7,padding:"10px 14px",marginBottom:12,fontSize:11,color:"#c8a84b"}}>⏳ <strong>{openN}</strong> trade {openN===1?"aperto":"aperti"} — tocca la riga per aggiornare.</div>}
+
+      <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
+        {["all","open","win","loss","scalp","intraday","swing"].map(f=>(
+          <button key={f} className={`btn btn-sm ${filter===f?"btn-p":"btn-g"}`} onClick={()=>setFilter(f)}>
+            {f==="all"?"Tutti":f==="open"?"Aperti":f==="win"?"Win":f==="loss"?"Loss":MODES[f]?.label||f}
+          </button>
+        ))}
+      </div>
+
       {trades.length===0
         ?<div className="empty"><div className="empty-icon">📋</div>Nessun trade ancora.<br/>Usa il calcolatore per iniziare.</div>
         :<div className="card" style={{padding:0,overflow:"hidden"}}>
           <div className="mobile-scroll">
             <table className="jtable">
               <thead><tr>
-                <th>Data</th><th>Pair</th><th>Tipo</th><th>Lotti</th><th>RR</th><th>✅</th><th>Esito</th><th>P&L</th><th></th>
+                <th>Data</th><th>Ora</th><th>Asset</th><th>Tipo</th><th>Mode</th><th>Setup</th><th>TF</th>
+                <th>Lotti</th><th>RR</th><th>Rischio</th><th>Check</th><th>Esito</th><th>P&L</th><th>😊</th><th></th>
               </tr></thead>
               <tbody>
-                {trades.map(t=>(
+                {filtered.map(t=>(
                   <tr key={t.id} className={t.outcome==="open"?"open-row":""} onClick={()=>setEditTrade(t)}>
-                    <td style={{color:"#999"}}>{t.date}</td>
+                    <td style={{color:"#666"}}>{t.dateEntry||t.date||"—"}</td>
+                    <td style={{color:"#555"}}>{t.timeEntry||"—"}</td>
                     <td style={{fontWeight:"bold"}}>{t.symbol||"—"}</td>
+                    <td><span className={`tag t-${(t.tipo||"long").toLowerCase()}`}>{t.tipo||"—"}</span></td>
                     <td><span className={`tag t-${t.mode}`}>{MODES[t.mode]?.label||t.mode}</span></td>
+                    <td style={{color:"#888",maxWidth:120,overflow:"hidden",textOverflow:"ellipsis"}}>{t.setup||"—"}</td>
+                    <td style={{color:"#666"}}>{t.timeframe||"—"}</td>
                     <td>{t.lots?t.lots+" L":"—"}</td>
                     <td style={{color:parseFloat(t.rr)>=(MODES[t.mode]?.rrMin||0)?"#4caf7d":"#e05c5c"}}>{t.rr?t.rr+"x":"—"}</td>
+                    <td>{t.riskEur?t.riskEur+"€":"—"}</td>
                     <td><ScoreBadge mode={t.mode} checked={t.checklist||{}}/></td>
                     <td><span className={`tag t-${t.outcome}`}>{t.outcome==="win"?"WIN":t.outcome==="loss"?"LOSS":"⏳"}</span></td>
-                    <td style={{color:parseFloat(t.pnl)>=0?"#4caf7d":"#e05c5c",fontWeight:"bold"}}>{t.pnl?(parseFloat(t.pnl)>=0?"+":"")+parseFloat(t.pnl).toFixed(0)+"€":"—"}</td>
+                    <td style={{color:parseFloat(t.pnlNetto)>=0?"#4caf7d":"#e05c5c",fontWeight:"bold"}}>{t.pnlNetto?(parseFloat(t.pnlNetto)>=0?"+":"")+parseFloat(t.pnlNetto).toFixed(0)+"€":"—"}</td>
+                    <td>{t.emotion?EMOTIONS[t.emotion-1]:"—"}</td>
                     <td onClick={e=>remove(t.id,e)}><button className="del-btn">✕</button></td>
                   </tr>
                 ))}
@@ -504,14 +732,15 @@ function Journal({refreshKey,onCountChange}){
           </div>
         </div>
       }
+
       {trades.some(t=>t.notes)&&(
         <div className="card" style={{marginTop:8}}>
           <div className="ctitle">Note</div>
           {trades.filter(t=>t.notes).map(t=>(
-            <div key={t.id} style={{borderLeft:"2px solid #8a7030",paddingLeft:12,marginBottom:12,fontSize:12,lineHeight:1.6}}>
-              <span style={{color:"#c8a84b",fontWeight:"bold"}}>{t.symbol} {t.date}</span>
-              <span className={`tag t-${t.mode}`} style={{marginLeft:8}}>{MODES[t.mode]?.label}</span>
-              <br/><span style={{color:"#999"}}>{t.notes}</span>
+            <div key={t.id} style={{borderLeft:"2px solid #8a7030",paddingLeft:11,marginBottom:11,fontSize:11,lineHeight:1.6}}>
+              <span style={{color:"#c8a84b",fontWeight:"bold"}}>{t.symbol} {t.dateEntry||t.date}</span>
+              <span className={`tag t-${t.mode}`} style={{marginLeft:7}}>{MODES[t.mode]?.label}</span>
+              <br/><span style={{color:"#666"}}>{t.notes}</span>
             </div>
           ))}
         </div>
@@ -520,59 +749,228 @@ function Journal({refreshKey,onCountChange}){
   );
 }
 
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function Dashboard(){
+  const trades=loadTrades();
+  const s=calcStats(trades);
+  const canvasRef=useRef(null);
+  const chartRef=useRef(null);
+
+  useEffect(()=>{
+    if(!canvasRef.current||s.curve.length<2) return;
+    if(chartRef.current) chartRef.current.destroy();
+    const ctx=canvasRef.current.getContext("2d");
+    const color=s.totalPnl>=0?"#4caf7d":"#e05c5c";
+    chartRef.current=new Chart(ctx,{
+      type:"line",
+      data:{
+        labels:s.curve.map(p=>p.x===0?"Start":"#"+p.x),
+        datasets:[{
+          label:"Equity",data:s.curve.map(p=>p.y),
+          borderColor:color,backgroundColor:color+"22",
+          borderWidth:2,pointRadius:s.curve.length>20?0:3,
+          pointBackgroundColor:color,fill:true,tension:.3
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" "+c.parsed.y.toFixed(2)+"€"}}},
+        scales:{
+          x:{grid:{color:"#1a1a1a"},ticks:{color:"#444",font:{size:10}}},
+          y:{grid:{color:"#1a1a1a"},ticks:{color:"#444",font:{size:10},callback:v=>v.toFixed(0)+"€"}}
+        }
+      }
+    });
+    return()=>{ if(chartRef.current){chartRef.current.destroy();chartRef.current=null;} };
+  },[trades.length]);
+
+  return(
+    <div>
+      <div className="section-badge">📊 Dashboard Generale</div>
+      <div className="kpi-grid">
+        <div className="kpi"><div className="kpi-label">Capitale Iniziale</div><div className="kpi-val ac">{s.capital.toFixed(0)}€</div></div>
+        <div className="kpi"><div className="kpi-label">Capitale Attuale</div><div className={`kpi-val ${s.currentCapital>=s.capital?"up":"dn"}`}>{s.currentCapital.toFixed(2)}€</div></div>
+        <div className="kpi"><div className="kpi-label">P&L Totale</div><div className={`kpi-val ${s.totalPnl>=0?"up":"dn"}`}>{fmtEur(s.totalPnl)}</div></div>
+        <div className="kpi"><div className="kpi-label">P&L %</div><div className={`kpi-val ${s.totalPnl>=0?"up":"dn"}`}>{fmtPct(s.totalPnl/s.capital*100)}</div></div>
+        <div className="kpi"><div className="kpi-label">Win Rate</div><div className="kpi-val up">{fmtPct(s.wr)}</div></div>
+        <div className="kpi"><div className="kpi-label">Trade Chiusi</div><div className="kpi-val">{s.closed.length}</div></div>
+        <div className="kpi"><div className="kpi-label">Profit Factor</div><div className={`kpi-val ${s.pf>=1.5?"up":s.pf>=1?"ac":"dn"}`}>{s.pf===Infinity?"∞":fmt(s.pf)}</div></div>
+        <div className="kpi"><div className="kpi-label">RR Medio</div><div className="kpi-val ac">{fmt(s.avgRR)}x</div></div>
+        <div className="kpi"><div className="kpi-label">Avg Win</div><div className="kpi-val up">{fmtEur(s.avgWin)}</div></div>
+        <div className="kpi"><div className="kpi-label">Avg Loss</div><div className={`kpi-val dn`}>{fmtEur(s.avgLoss)}</div></div>
+        <div className="kpi"><div className="kpi-label">Max Drawdown</div><div className="kpi-val dn">{fmtEur(s.maxDD)}</div></div>
+        <div className="kpi"><div className="kpi-label">Cons. Wins</div><div className="kpi-val up">{s.maxCW}</div></div>
+        <div className="kpi"><div className="kpi-label">Cons. Losses</div><div className="kpi-val dn">{s.maxCL}</div></div>
+        <div className="kpi"><div className="kpi-label">Largest Win</div><div className="kpi-val up">{fmtEur(Math.max(0,...s.wins.map(t=>parseFloat(t.pnlNetto)||0)))}</div></div>
+        <div className="kpi"><div className="kpi-label">Largest Loss</div><div className="kpi-val dn">{fmtEur(Math.min(0,...s.losses.map(t=>parseFloat(t.pnlNetto)||0)))}</div></div>
+      </div>
+
+      {s.curve.length>=2?(
+        <div className="card">
+          <div className="ctitle">Equity Curve</div>
+          <div style={{height:220,position:"relative"}}><canvas ref={canvasRef}/></div>
+        </div>
+      ):(
+        <div className="card"><div className="empty" style={{padding:"20px 0"}}>📈 Chiudi almeno 2 trade per vedere la equity curve</div></div>
+      )}
+    </div>
+  );
+}
+
+// ── ANALISI ───────────────────────────────────────────────────────────────────
+function Analisi(){
+  const trades=loadTrades();
+  const [view,setView]=useState("asset");
+
+  const closed=trades.filter(t=>t.outcome!=="open");
+
+  const groupBy=(key)=>{
+    const map={};
+    closed.forEach(t=>{
+      const k=t[key]||"Altro";
+      if(!map[k]) map[k]={key:k,n:0,wins:0,losses:0,pnl:0};
+      map[k].n++;
+      if(t.outcome==="win") map[k].wins++;
+      else map[k].losses++;
+      map[k].pnl+=parseFloat(t.pnlNetto)||0;
+    });
+    return Object.values(map).sort((a,b)=>b.n-a.n);
+  };
+
+  const dayMap={0:"Domenica",1:"Lunedì",2:"Martedì",3:"Mercoledì",4:"Giovedì",5:"Venerdì",6:"Sabato"};
+  const byDay=()=>{
+    const map={};
+    closed.forEach(t=>{
+      const d=new Date(t.dateEntry||t.date);
+      const k=dayMap[d.getDay()]||"—";
+      if(!map[k]) map[k]={key:k,n:0,wins:0,losses:0,pnl:0};
+      map[k].n++;
+      if(t.outcome==="win") map[k].wins++;
+      else map[k].losses++;
+      map[k].pnl+=parseFloat(t.pnlNetto)||0;
+    });
+    return ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"].map(d=>map[d]||{key:d,n:0,wins:0,losses:0,pnl:0});
+  };
+
+  const byEmotion=()=>{
+    const map={};
+    closed.forEach(t=>{
+      const k=t.emotion||"—";
+      if(!map[k]) map[k]={key:k,n:0,wins:0,losses:0,pnl:0};
+      map[k].n++;
+      if(t.outcome==="win") map[k].wins++;
+      else map[k].losses++;
+      map[k].pnl+=parseFloat(t.pnlNetto)||0;
+    });
+    return Object.values(map).sort((a,b)=>a.key-b.key);
+  };
+
+  const rows=view==="asset"?groupBy("symbol"):view==="setup"?groupBy("setup"):view==="day"?byDay():view==="emotion"?byEmotion():groupBy("mode");
+
+  return(
+    <div>
+      <div className="atab-row">
+        {[["asset","💹 Per Asset"],["setup","🎯 Per Setup"],["mode","📊 Per Modalità"],["day","📅 Per Giorno"],["emotion","😊 Per Emozione"]].map(([k,l])=>(
+          <div key={k} className={`atab ${view===k?"on":""}`} onClick={()=>setView(k)}>{l}</div>
+        ))}
+      </div>
+
+      {closed.length===0
+        ?<div className="empty"><div className="empty-icon">📈</div>Chiudi dei trade per vedere le analisi.</div>
+        :<div className="card" style={{padding:0,overflow:"hidden"}}>
+          <div className="mobile-scroll">
+            <table className="stat-table">
+              <thead><tr>
+                <th>{view==="asset"?"Asset":view==="setup"?"Setup":view==="mode"?"Modalità":view==="day"?"Giorno":"Emozione"}</th>
+                <th>Trade</th><th>Wins</th><th>Losses</th><th>Win%</th><th>P&L Netto</th><th>Avg P&L</th>
+              </tr></thead>
+              <tbody>
+                {rows.map(r=>{
+                  const wr=r.n>0?(r.wins/r.n*100).toFixed(0):0;
+                  const avg=r.n>0?r.pnl/r.n:0;
+                  const label=view==="emotion"&&r.key!=="—"?`${EMOTIONS[r.key-1]} ${["Pessimo","Negativo","Neutro","Positivo","Ottimo"][r.key-1]||""}`:r.key;
+                  return(
+                    <tr key={r.key}>
+                      <td style={{fontWeight:"bold"}}>{label}</td>
+                      <td>{r.n}</td>
+                      <td style={{color:"#4caf7d"}}>{r.wins}</td>
+                      <td style={{color:"#e05c5c"}}>{r.losses}</td>
+                      <td style={{color:+wr>=50?"#4caf7d":"#e05c5c"}}>{r.n>0?wr+"%":"—"}</td>
+                      <td style={{color:r.pnl>=0?"#4caf7d":"#e05c5c",fontWeight:"bold"}}>{fmtEur(r.pnl)}</td>
+                      <td style={{color:avg>=0?"#4caf7d":"#e05c5c"}}>{r.n>0?fmtEur(avg):"—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+  );
+}
+
+// ── CHECKLIST TAB ─────────────────────────────────────────────────────────────
 function ChecklistTab(){
   const [mode,setMode]=useState("swing");
   const [checked,setChecked]=useState({});
   const {done,total,pct}=score(mode,checked);
   return(
     <div>
-      <div className="modes" style={{marginBottom:20}}>
+      <div className="modes" style={{marginBottom:18}}>
         {Object.entries(CHECKLISTS).map(([k,cl])=>(
           <div key={k} className={`mode ${mode===k?"on":""}`} onClick={()=>{setMode(k);setChecked({});}}>
             <span className="mlabel">{cl.label}</span><span className="mmeta">{MODES[k]?.tf}</span>
           </div>
         ))}
       </div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-        <div style={{fontSize:11,color:"#999"}}>{done}/{total} voci · {pct}%</div>
-        <button className="btn btn-g" onClick={()=>setChecked({})} style={{fontSize:11,padding:"6px 14px"}}>Reset</button>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{fontSize:10,color:"#666"}}>{done}/{total} voci · {pct}%</div>
+        <button className="btn btn-g btn-sm" onClick={()=>setChecked({})}>Reset</button>
       </div>
       <InlineChecklist mode={mode} checked={checked} onChange={setChecked}/>
-      <div className={`cl-standalone-sum ${pct===100?"ok":"no"}`} style={{marginTop:16}}>
+      <div className={`cl-standalone-sum ${pct===100?"ok":"no"}`} style={{marginTop:14}}>
         <span>{pct===100?"✅ Setup valido — puoi entrare":`❌ ${total-done} voci mancanti — Non entrare`}</span>
-        <span style={{fontSize:12,opacity:.8}}>{done}/{total}</span>
+        <span style={{fontSize:11,opacity:.8}}>{done}/{total}</span>
       </div>
     </div>
   );
 }
 
+// ── APP ───────────────────────────────────────────────────────────────────────
 function App(){
   const [tab,setTab]=useState("calc");
   const [modal,setModal]=useState(null);
-  const [openCount,setOpenCount]=useState(0);
+  const [openCount,setOpenCount]=useState(()=>loadTrades().filter(t=>t.outcome==="open").length);
   const [jKey,setJKey]=useState(0);
+
   const handleSaveNew=(data)=>{
     const current=loadTrades();
     saveTrades([{...data,id:Date.now().toString(),createdAt:new Date().toISOString()},...current]);
     setModal(null);setJKey(k=>k+1);setTab("journal");
   };
+
   return(
     <>
       {modal&&<TradeModal data={modal} isNew={true} onClose={()=>setModal(null)} onSave={handleSaveNew}/>}
       <div className="wrap">
         <div className="hdr">
           <div className="htitle">TRADING DESK</div>
-          <div className="hsub">Prop 10.000€ · Schemi Istituzionali</div>
+          <div className="hsub">Schemi Istituzionali · Prop 10.000€</div>
         </div>
         <div className="tabs">
           <button className={`tab ${tab==="calc"?"on":""}`} onClick={()=>setTab("calc")}>⚖ Size</button>
           <button className={`tab ${tab==="journal"?"on":""}`} onClick={()=>setTab("journal")}>
             📋 Journal{openCount>0&&<span className="tab-badge">{openCount}</span>}
           </button>
+          <button className={`tab ${tab==="dashboard"?"on":""}`} onClick={()=>setTab("dashboard")}>📊 Dashboard</button>
+          <button className={`tab ${tab==="analisi"?"on":""}`} onClick={()=>setTab("analisi")}>📈 Analisi</button>
           <button className={`tab ${tab==="checklist"?"on":""}`} onClick={()=>setTab("checklist")}>✅ Check</button>
         </div>
         {tab==="calc"&&<Calculator onOpenModal={setModal}/>}
         {tab==="journal"&&<Journal refreshKey={jKey} onCountChange={setOpenCount}/>}
+        {tab==="dashboard"&&<Dashboard/>}
+        {tab==="analisi"&&<Analisi/>}
         {tab==="checklist"&&<ChecklistTab/>}
       </div>
     </>
@@ -581,5 +979,6 @@ function App(){
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
+<script>if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js')); }</script>
 </body>
 </html>
